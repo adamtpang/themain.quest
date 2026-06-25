@@ -126,7 +126,7 @@ export function QuestBoard({
   }
 
   return (
-    <section className="mx-auto max-w-md px-4 pt-4 pb-28">
+    <section className="mx-auto max-w-md px-4 pt-4">
       <div className="mb-2 flex items-center justify-between">
         <h2 className="text-[11px] font-black uppercase tracking-[0.25em] text-hud-dim">
           The board

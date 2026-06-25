@@ -3,11 +3,14 @@
 import { useEffect, useMemo } from "react";
 import { AffirmationBanner } from "@/components/AffirmationBanner";
 import { BindingGoal } from "@/components/BindingGoal";
+import { CalendarPanel } from "@/components/CalendarPanel";
 import { Header } from "@/components/Header";
+import { KpiPanel } from "@/components/KpiPanel";
 import { LensCards } from "@/components/LensCards";
 import { QuestBoard } from "@/components/QuestBoard";
 import { Rungs } from "@/components/Rungs";
 import { bindingGoal, canBind, recommendedBinding } from "@/lib/board";
+import { defaultKpis, Kpi } from "@/lib/kpis";
 import { computeScore } from "@/lib/score";
 import { todayStr, useLocalStorage } from "@/lib/storage";
 import {
@@ -21,6 +24,7 @@ import {
 
 const QUESTS_KEY = "tmq.quests";
 const DAY_KEY = "tmq.day";
+const KPIS_KEY = "tmq.kpis";
 
 function freshDay(): DayState {
   return { date: todayStr(), rungs: freshRungs() };
@@ -29,6 +33,7 @@ function freshDay(): DayState {
 export default function Page() {
   const [quests, setQuests] = useLocalStorage<Quest[]>(QUESTS_KEY, []);
   const [day, setDay, dayHydrated] = useLocalStorage<DayState>(DAY_KEY, freshDay());
+  const [kpis, setKpis] = useLocalStorage<Kpi[]>(KPIS_KEY, defaultKpis());
 
   // Every day boots at 5/10: reset rungs when the date rolls over.
   useEffect(() => {
@@ -145,7 +150,9 @@ export default function Page() {
         onSetBinding={setBinding}
         onDelete={deleteQuest}
       />
+      <CalendarPanel />
       <LensCards />
+      <KpiPanel kpis={kpis} onChange={setKpis} />
       <footer className="mx-auto max-w-md px-4 py-6 text-center text-[10px] leading-relaxed text-hud-dim/70">
         themain.quest · this dashboard is a Loops-tier build. Now go close your #1.
       </footer>
