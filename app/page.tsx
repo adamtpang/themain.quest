@@ -130,7 +130,7 @@ export default function Page() {
   }
 
   return (
-    <main className="min-h-screen">
+    <main className="min-h-screen pb-24">
       <Header score={score} />
       <AffirmationBanner />
       <BindingGoal
@@ -153,8 +153,10 @@ export default function Page() {
       <CalendarPanel />
       <LensCards />
       <KpiPanel kpis={kpis} onChange={setKpis} />
-      <footer className="mx-auto max-w-md px-4 py-6 text-center text-[10px] leading-relaxed text-hud-dim/70">
-        themain.quest · this dashboard is a Loops-tier build. Now go close your #1.
+      <footer className="mx-auto max-w-md px-3 pt-6 text-center">
+        <p className="font-pixel text-[7px] uppercase leading-relaxed text-ink/70">
+          the main quest · this dashboard is a Loops-tier build. now go strike the boss.
+        </p>
       </footer>
     </main>
   );

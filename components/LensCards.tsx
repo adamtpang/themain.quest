@@ -7,46 +7,44 @@ type Lens = {
   sub: string;
   summary: string;
   href: string;
-  accent: string;
+  bg: string;
 };
 
-// Clean seams: each lens deep-links out for v1; swap href for a native panel later.
+// The life stack, as portals. Swap href for a native panel later.
 const LENSES: Lens[] = [
   {
     key: "who",
-    label: "WHO",
-    emoji: "👥",
-    sub: "people",
-    summary: "Who matters, who is owed a message",
+    label: "PARTY",
+    emoji: "🧑‍🤝‍🧑",
+    sub: "who",
+    summary: "People who matter",
     href: "https://pokedex.life",
-    accent: "text-life",
+    bg: "bg-bubblegum",
   },
   {
     key: "what",
-    label: "WHAT",
+    label: "QUESTS",
     emoji: "🎯",
-    sub: "goals",
-    summary: "Goals and projects in motion",
+    sub: "what",
+    summary: "Goals in motion",
     href: "https://optimism.fun",
-    accent: "text-health",
+    bg: "bg-health",
   },
   {
     key: "where",
-    label: "WHERE",
-    emoji: "🌍",
-    sub: "place",
-    summary: "Where you are, where you are headed",
+    label: "MAP",
+    emoji: "🗺️",
+    sub: "where",
+    summary: "Where you roam",
     href: "https://portal.voyage",
-    accent: "text-visa",
+    bg: "bg-visa",
   },
 ];
 
 export function LensCards() {
   return (
-    <section className="mx-auto max-w-md px-4 pt-4">
-      <h2 className="mb-2 text-[11px] font-black uppercase tracking-[0.25em] text-hud-dim">
-        The three lenses
-      </h2>
+    <section className="mx-auto max-w-md px-3 pt-4">
+      <h2 className="mb-2 font-pixel text-[10px] uppercase text-ink">🌀 the three portals</h2>
       <div className="grid grid-cols-3 gap-2">
         {LENSES.map((l) => (
           <a
@@ -54,13 +52,13 @@ export function LensCards() {
             href={l.href}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex flex-col rounded-xl border border-hud-line bg-hud-panel p-3 transition active:scale-[0.97]"
+            className={`btn flex flex-col items-start p-2 ${l.bg}`}
           >
-            <span className="text-2xl">{l.emoji}</span>
-            <span className={`mt-1 text-sm font-black ${l.accent}`}>{l.label}</span>
-            <span className="text-[10px] uppercase tracking-wider text-hud-dim">{l.sub}</span>
-            <span className="mt-2 text-[10px] leading-tight text-hud-dim">{l.summary}</span>
-            <span className="mt-2 text-[10px] font-bold text-hud-dim">open ↗</span>
+            <span className="animate-bob text-2xl">{l.emoji}</span>
+            <span className="mt-1 font-pixel text-[9px] uppercase text-ink">{l.label}</span>
+            <span className="text-sm uppercase leading-none text-ink/70">{l.sub}</span>
+            <span className="mt-1 text-sm leading-tight text-ink/80">{l.summary}</span>
+            <span className="mt-1 font-pixel text-[6px] uppercase text-ink">enter →</span>
           </a>
         ))}
       </div>

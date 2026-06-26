@@ -9,7 +9,6 @@ export function AffirmationBanner() {
   const [idx, setIdx] = useState(0);
   const [shown, setShown] = useState(false);
 
-  // Rotate to the next identity on every load.
   useEffect(() => {
     let prev = 0;
     try {
@@ -28,13 +27,12 @@ export function AffirmationBanner() {
   }, []);
 
   return (
-    <div className="mx-auto max-w-md px-4 pt-3">
-      <div className="overflow-hidden rounded-lg border border-leverage/30 bg-leverage/5 px-3 py-2">
+    <div className="mx-auto max-w-md px-3 pt-3">
+      <div className="panel bg-bubblegum px-3 py-2">
+        <p className="font-pixel text-[7px] uppercase text-ink/70">today you are</p>
         <p
           key={idx}
-          className={`text-center text-xs font-bold uppercase tracking-wider text-leverage ${
-            shown ? "animate-flash" : ""
-          }`}
+          className={`text-lg leading-tight text-ink ${shown ? "animate-flash" : ""}`}
         >
           {AFFIRMATIONS[idx]}
         </p>

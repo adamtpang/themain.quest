@@ -21,21 +21,18 @@ export function BindingGoal({
   onPromote: (id: string) => void;
   onClear: () => void;
 }) {
-  // A harder open close exists than the one currently crowned.
   const harderExists =
     binding && recommended && recommended.id !== binding.id && rank(recommended.priority) < rank(binding.priority);
 
   return (
-    <section className="mx-auto max-w-md px-4 pt-3">
-      <div className="relative animate-glow overflow-hidden rounded-2xl border-2 border-hud-gold/60 bg-gradient-to-b from-hud-gold/10 to-hud-panel p-4 shadow-lg">
+    <section className="mx-auto max-w-md px-3 pt-3">
+      <div className="panel relative overflow-hidden bg-gold p-3">
         <div className="mb-2 flex items-center justify-between">
-          <span className="text-[10px] font-black uppercase tracking-[0.25em] text-hud-gold">
-            🥇 Binding goal · your one move
-          </span>
+          <span className="font-pixel text-[8px] uppercase text-ink">🗡 main quest · the one boss</span>
           {binding && (
             <button
               onClick={onClear}
-              className="text-[10px] font-bold uppercase tracking-wider text-hud-dim hover:text-white"
+              className="font-pixel text-[7px] uppercase text-ink/70 hover:text-ink"
             >
               swap
             </button>
@@ -44,49 +41,47 @@ export function BindingGoal({
 
         {binding ? (
           <div className="animate-flash">
-            <p className="mb-3 text-xl font-black leading-tight text-white">{binding.title}</p>
-            <div className="mb-4">
+            <p className="mb-2 text-2xl leading-tight text-ink">{binding.title}</p>
+            <div className="mb-3">
               <PriorityTag priority={binding.priority} />
             </div>
             <button
               onClick={onComplete}
-              className="w-full rounded-xl bg-hud-gold py-3 text-base font-black uppercase tracking-wider text-black transition active:scale-[0.98]"
+              className="btn w-full bg-life py-2 font-pixel text-[11px] uppercase text-paper"
             >
-              Close it ✅
+              strike the boss ⚔
             </button>
             {harderExists && (
               <button
                 onClick={() => onPromote(recommended!.id)}
-                className="mt-2 w-full rounded-lg border border-life/40 bg-life/10 px-3 py-2 text-left text-xs text-life"
+                className="btn mt-2 w-full bg-paper px-2 py-1.5 text-left text-base text-ink"
               >
-                A harder close is open: <span className="font-bold">{recommended!.title}</span>. Tap to
-                promote it to #1.
+                A tougher boss is open: <span className="text-life">{recommended!.title}</span>. Tap to
+                challenge it.
               </button>
             )}
           </div>
         ) : (
           <div>
-            <p className="mb-1 text-lg font-black leading-tight text-white">No #1 set.</p>
-            <p className="mb-3 text-xs leading-relaxed text-hud-dim">
-              This slot only accepts a cash, ship, or life close. Motion cannot be #1. Crown your
-              hardest open close and go.
+            <p className="mb-1 text-xl leading-tight text-ink">No boss chosen.</p>
+            <p className="mb-3 text-base leading-snug text-ink/80">
+              This slot only takes a cash, ship, or life close. A trap cannot be the boss. Pick your
+              hardest open fight and go.
             </p>
             {recommended ? (
               <button
                 onClick={() => onPromote(recommended.id)}
-                className="w-full rounded-xl border border-hud-gold/50 bg-hud-gold/10 p-3 text-left transition active:scale-[0.98]"
+                className="btn w-full bg-paper p-2 text-left"
               >
-                <span className="mb-2 block text-sm font-bold text-white">{recommended.title}</span>
-                <span className="flex items-center justify-between">
+                <span className="mb-2 block text-lg leading-tight text-ink">{recommended.title}</span>
+                <span className="flex items-center justify-between gap-2">
                   <PriorityTag priority={recommended.priority} />
-                  <span className="text-[10px] font-black uppercase tracking-wider text-hud-gold">
-                    Set as #1 →
-                  </span>
+                  <span className="font-pixel text-[8px] uppercase text-ink">make it boss →</span>
                 </span>
               </button>
             ) : (
-              <p className="rounded-lg border border-hud-line bg-hud-bg/50 p-3 text-xs text-hud-dim">
-                Add real quests to the board below, then crown your hardest close here.
+              <p className="inset px-2 py-2 text-base text-ink/80">
+                Load the quest log below, then crown your hardest fight here.
               </p>
             )}
           </div>

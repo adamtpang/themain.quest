@@ -20,7 +20,7 @@ function embedUrl(src: string, mode: Mode, tz: string) {
     showTz: "0",
     showNav: "1",
     showDate: "1",
-    bgcolor: "#0d1018",
+    bgcolor: "#fff7e6",
   });
   return `https://calendar.google.com/calendar/embed?${p.toString()}`;
 }
@@ -43,20 +43,16 @@ export function CalendarPanel() {
   const modes: Mode[] = ["AGENDA", "WEEK", "MONTH"];
 
   return (
-    <section className="mx-auto max-w-md px-4 pt-4">
+    <section className="mx-auto max-w-md px-3 pt-4">
       <div className="mb-2 flex items-center justify-between">
-        <h2 className="text-[11px] font-black uppercase tracking-[0.25em] text-hud-dim">
-          📅 Calendar
-        </h2>
+        <h2 className="font-pixel text-[10px] uppercase text-ink">🕰 today's timeline</h2>
         <div className="flex items-center gap-1">
           {modes.map((m) => (
             <button
               key={m}
               onClick={() => setMode(m)}
-              className={`rounded-full border px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider active:scale-95 ${
-                mode === m
-                  ? "border-visa/60 bg-visa/15 text-visa"
-                  : "border-hud-line bg-hud-panel text-hud-dim"
+              className={`btn px-1.5 py-px font-pixel text-[6px] uppercase ${
+                mode === m ? "bg-visa text-paper" : "bg-paper text-ink"
               }`}
             >
               {m}
@@ -65,17 +61,17 @@ export function CalendarPanel() {
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-hud-line bg-hud-panel">
+      <div className="panel overflow-hidden bg-paper p-0">
         {hydrated && src ? (
           <iframe
             key={`${src}-${mode}-${tz}`}
             title="Google Calendar"
             src={embedUrl(src, mode, tz)}
-            className="block h-[460px] w-full border-0 bg-white"
+            className="block h-[440px] w-full border-0 bg-paper"
             loading="lazy"
           />
         ) : (
-          <div className="flex h-[120px] items-center justify-center text-xs text-hud-dim">
+          <div className="flex h-[120px] items-center justify-center text-lg text-ink/60">
             No calendar set.
           </div>
         )}
@@ -88,14 +84,14 @@ export function CalendarPanel() {
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
               placeholder="you@gmail.com or calendar id"
-              className="flex-1 rounded-lg border border-hud-line bg-hud-bg px-2 py-1 text-xs text-white placeholder:text-hud-dim/60 focus:border-visa focus:outline-none"
+              className="inset flex-1 px-2 py-1 text-base text-ink placeholder:text-ink/40 focus:outline-none"
             />
             <button
               onClick={() => {
                 setSrc(draft.trim() || DEFAULT_SRC);
                 setEditing(false);
               }}
-              className="rounded-lg bg-visa px-2 py-1 text-[10px] font-black uppercase tracking-wider text-white active:scale-95"
+              className="btn bg-health px-2 py-1 font-pixel text-[7px] uppercase text-ink"
             >
               save
             </button>
@@ -107,7 +103,7 @@ export function CalendarPanel() {
                 setDraft(src);
                 setEditing(true);
               }}
-              className="text-[10px] font-bold uppercase tracking-wider text-hud-dim hover:text-white"
+              className="font-pixel text-[7px] uppercase text-ink/60 hover:text-ink"
             >
               change calendar
             </button>
@@ -115,15 +111,15 @@ export function CalendarPanel() {
               href="https://calendar.google.com/calendar/r"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[10px] font-bold uppercase tracking-wider text-visa"
+              className="font-pixel text-[7px] uppercase text-visa"
             >
-              open in google ↗
+              open in google →
             </a>
           </>
         )}
       </div>
 
-      <p className="mt-1 text-[10px] leading-relaxed text-hud-dim/80">
+      <p className="mt-1 text-sm leading-snug text-ink/60">
         Shows your calendar when you are signed into this Google account in this browser. A permission
         page means you need to sign in here first.
       </p>

@@ -38,7 +38,7 @@ export const KPI_COLOR_CLASS: Record<KpiColor, { text: string; bar: string; ring
   taxes: { text: "text-taxes", bar: "bg-taxes", ring: "border-taxes/40" },
   leverage: { text: "text-leverage", bar: "bg-leverage", ring: "border-leverage/40" },
   marketplace: { text: "text-marketplace", bar: "bg-marketplace", ring: "border-marketplace/40" },
-  gold: { text: "text-hud-gold", bar: "bg-hud-gold", ring: "border-hud-gold/40" },
+  gold: { text: "text-gold", bar: "bg-gold", ring: "border-gold/40" },
 };
 
 export const KPI_COLOR_CYCLE: KpiColor[] = [

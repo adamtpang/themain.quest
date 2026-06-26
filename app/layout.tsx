@@ -1,16 +1,31 @@
 import type { Metadata, Viewport } from "next";
+import { Press_Start_2P, VT323 } from "next/font/google";
 import "./globals.css";
 
+const press = Press_Start_2P({
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-press",
+  display: "swap",
+});
+
+const vt = VT323({
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-vt",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
-  title: "themain.quest",
-  description: "The one move that matters most, right now. Days are XP. Spend today's well.",
+  title: "the main quest",
+  description: "Your one life, gamified. Days are XP. Close the boss. Welcome to Ooo.",
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
-  themeColor: "#06070d",
+  themeColor: "#9bd9ff",
 };
 
 export default function RootLayout({
@@ -19,8 +34,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className="font-mono antialiased">{children}</body>
+    <html lang="en" className={`${press.variable} ${vt.variable}`}>
+      <body className="font-vt antialiased">{children}</body>
     </html>
   );
 }

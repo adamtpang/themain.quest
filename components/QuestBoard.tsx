@@ -23,52 +23,38 @@ function QuestRow({
 }) {
   const eligible = q.passesMotionTest && !q.done;
   return (
-    <div
-      className={`rounded-xl border p-3 ${
-        q.passesMotionTest
-          ? q.isBinding
-            ? "border-hud-gold/50 bg-hud-gold/5"
-            : "border-hud-line bg-hud-panel"
-          : "border-hud-line/60 bg-hud-bg/40 opacity-70"
-      }`}
-    >
+    <div className={`panel p-2 ${q.passesMotionTest ? (q.isBinding ? "bg-gold/40" : "bg-paper") : "bg-loops/20"}`}>
       <div className="flex items-start gap-2">
         <button
           onClick={() => onToggleDone(q.id)}
-          className={`mt-0.5 flex h-6 w-6 flex-none items-center justify-center rounded-md border text-xs transition active:scale-90 ${
-            q.done
-              ? "border-transparent bg-health text-black animate-pop"
-              : "border-hud-line bg-hud-bg text-transparent"
+          className={`mt-px flex h-6 w-6 flex-none items-center justify-center border-2 border-ink text-sm leading-none active:translate-x-px active:translate-y-px ${
+            q.done ? "bg-health text-ink animate-pop" : "bg-paper2 text-transparent"
           }`}
           aria-label="toggle done"
         >
           ✓
         </button>
-        <p
-          className={`min-w-0 flex-1 text-sm leading-snug ${
-            q.done ? "text-hud-dim line-through" : "text-white"
-          }`}
-        >
-          {q.isBinding && <span className="mr-1">🥇</span>}
+        <p className={`min-w-0 flex-1 text-lg leading-tight ${q.done ? "text-ink/50 line-through" : "text-ink"}`}>
+          {q.isBinding && <span className="mr-1">🗡</span>}
           {q.title}
         </p>
         <button
           onClick={() => onDelete(q.id)}
-          className="flex-none px-1 text-hud-dim hover:text-life"
+          className="flex-none px-1 font-pixel text-[10px] text-ink/40 hover:text-life"
           aria-label="delete"
         >
-          ×
+          x
         </button>
       </div>
 
-      <div className="mt-2 flex flex-wrap items-center gap-2">
+      <div className="mt-2 flex flex-wrap items-center gap-1.5">
         <button onClick={() => onCyclePriority(q.id)} aria-label="change priority">
           <PriorityTag priority={q.priority} />
         </button>
         <button onClick={() => onToggleMotion(q.id)} aria-label="toggle motion test">
           {q.passesMotionTest ? (
-            <span className="inline-flex items-center gap-1 rounded-full border border-health/40 bg-health/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-health">
-              real
+            <span className="tag inline-flex items-center bg-health px-1.5 py-px text-sm uppercase leading-none text-ink">
+              quest
             </span>
           ) : (
             <MotionTag />
@@ -78,16 +64,16 @@ function QuestRow({
         {eligible && !q.isBinding && (
           <button
             onClick={() => onSetBinding(q.id)}
-            className="ml-auto rounded-full border border-hud-gold/50 bg-hud-gold/10 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-hud-gold active:scale-95"
+            className="btn ml-auto bg-gold px-1.5 py-px font-pixel text-[7px] uppercase text-ink"
           >
-            🥇 set #1
+            🗡 make boss
           </button>
         )}
       </div>
 
       {!q.passesMotionTest && (
-        <p className="mt-2 text-[11px] italic text-hud-dim">
-          This is motion, not execution. Park it.
+        <p className="mt-1.5 text-sm italic leading-snug text-ink/60">
+          This is a trap, not a quest. Park it.
         </p>
       )}
     </div>
@@ -126,45 +112,43 @@ export function QuestBoard({
   }
 
   return (
-    <section className="mx-auto max-w-md px-4 pt-4">
+    <section className="mx-auto max-w-md px-3 pt-4">
       <div className="mb-2 flex items-center justify-between">
-        <h2 className="text-[11px] font-black uppercase tracking-[0.25em] text-hud-dim">
-          The board
-        </h2>
+        <h2 className="font-pixel text-[10px] uppercase text-ink">📜 quest log</h2>
         <button
           onClick={() => setOpen((v) => !v)}
-          className="rounded-full border border-hud-line bg-hud-panel px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white active:scale-95"
+          className="btn bg-visa px-2 py-1 font-pixel text-[7px] uppercase text-paper"
         >
-          {open ? "close" : "+ paste outbox"}
+          {open ? "close" : "+ load outbox"}
         </button>
       </div>
 
       {open && (
-        <div className="mb-3 rounded-xl border border-hud-line bg-hud-panel p-3">
+        <div className="panel mb-3 bg-paper p-2">
           <textarea
             value={raw}
             onChange={(e) => setRaw(e.target.value)}
             rows={6}
-            placeholder={"Dump raw outbox lines, one per line.\nTags like [im5 ef2] are stripped.\nMotion is auto flagged, you get final say."}
-            className="w-full resize-y rounded-lg border border-hud-line bg-hud-bg p-2 text-sm text-white placeholder:text-hud-dim/60 focus:border-leverage focus:outline-none"
+            placeholder={"Dump raw outbox lines, one per line.\nTags like [im5 ef2] get stripped.\nTraps are auto flagged, you get final say."}
+            className="inset w-full resize-y p-2 text-lg leading-snug text-ink placeholder:text-ink/40 focus:outline-none"
           />
           <div className="mt-2 flex items-center justify-between">
-            <span className="text-[10px] text-hud-dim">
+            <span className="text-base text-ink/60">
               {raw.split(/\r?\n/).filter((l) => l.trim()).length} lines
             </span>
             <button
               onClick={handleParse}
-              className="rounded-lg bg-leverage px-3 py-1.5 text-xs font-black uppercase tracking-wider text-white active:scale-95"
+              className="btn bg-health px-2 py-1 font-pixel text-[8px] uppercase text-ink"
             >
-              Parse into quests
+              parse to quests
             </button>
           </div>
         </div>
       )}
 
       {real.length === 0 && motion.length === 0 && (
-        <p className="rounded-xl border border-dashed border-hud-line bg-hud-panel/40 p-6 text-center text-xs text-hud-dim">
-          No quests yet. Paste your outbox to load the board.
+        <p className="panel bg-paper/70 p-5 text-center text-lg text-ink/60">
+          Empty log. Load your outbox to fill the board.
         </p>
       )}
 
@@ -185,10 +169,8 @@ export function QuestBoard({
       {motion.length > 0 && (
         <div className="mt-5">
           <div className="mb-2 flex items-center gap-2">
-            <span className="text-[10px] font-black uppercase tracking-[0.25em] text-loops">
-              Parked · motion · 0 pts
-            </span>
-            <span className="h-px flex-1 bg-hud-line" />
+            <span className="font-pixel text-[8px] uppercase text-loops">✦ traps · parked · 0 xp</span>
+            <span className="h-1 flex-1 bg-loops/50" />
           </div>
           <div className="space-y-2">
             {motion.map((q) => (

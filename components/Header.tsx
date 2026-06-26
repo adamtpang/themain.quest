@@ -4,73 +4,65 @@ import { useEffect, useState } from "react";
 import { computeLifeLeft, LifeLeft } from "@/lib/life";
 import { ScoreResult } from "@/lib/score";
 
-function scoreMood(s: ScoreResult): { label: string; color: string } {
-  if (!s.keystoneDone) return { label: "WOBBLE", color: "text-taxes" };
-  if (s.score >= 10) return { label: "PERFECT", color: "text-hud-gold" };
-  if (s.isWinning) return { label: "WINNING", color: "text-health" };
-  return { label: "CLIMBING", color: "text-visa" };
+function scoreMood(s: ScoreResult): { label: string; bg: string } {
+  if (!s.keystoneDone) return { label: "shaky", bg: "bg-taxes" };
+  if (s.score >= 10) return { label: "legendary", bg: "bg-gold" };
+  if (s.isWinning) return { label: "questing", bg: "bg-health" };
+  return { label: "warming up", bg: "bg-visa" };
 }
 
 export function Header({ score }: { score: ScoreResult }) {
   const [life, setLife] = useState<LifeLeft | null>(null);
-
-  useEffect(() => {
-    setLife(computeLifeLeft());
-  }, []);
+  useEffect(() => setLife(computeLifeLeft()), []);
 
   const mood = scoreMood(score);
+  const hpPct = life ? 100 - life.percentElapsed : 100;
 
   return (
-    <header className="sticky top-0 z-30 border-b border-hud-line bg-hud-bg/90 backdrop-blur-md">
-      <div className="mx-auto flex max-w-md items-stretch justify-between gap-3 px-4 py-3">
-        {/* Day score */}
-        <div className="flex flex-col">
-          <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-hud-dim">
-            Today
-          </span>
-          <div className="flex items-baseline gap-1">
-            <span
-              key={score.score}
-              className="animate-pop text-3xl font-black leading-none tabular-nums"
-            >
-              {score.score}
-            </span>
-            <span className="text-sm font-bold text-hud-dim">/10</span>
-          </div>
-          <span className={`text-[10px] font-bold uppercase tracking-widest ${mood.color}`}>
+    <header className="sticky top-0 z-30 border-b-4 border-ink bg-paper">
+      <div className="mx-auto max-w-md px-3 py-2">
+        {/* wordmark row */}
+        <div className="mb-2 flex items-center justify-between">
+          <h1 className="flex items-center gap-1.5 font-pixel text-[11px] leading-none text-ink">
+            <span className="animate-bob text-base">❤️</span>
+            the main quest
+          </h1>
+          <span className={`tag ${mood.bg} px-1.5 py-px text-sm uppercase leading-none text-ink`}>
             {mood.label}
           </span>
         </div>
 
-        {/* Life-left clock */}
-        <div className="flex min-w-0 flex-1 flex-col items-end">
-          <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-hud-dim">
-            Life left
-          </span>
-          {life ? (
-            <>
-              <div className="flex items-baseline gap-1">
-                <span className="text-2xl font-black leading-none tabular-nums text-life">
-                  {life.daysLeft.toLocaleString()}
-                </span>
-                <span className="text-xs font-bold text-hud-dim">days</span>
-              </div>
-              <span className="text-[10px] text-hud-dim">
-                {life.percentElapsed.toFixed(1)}% spent · {life.daysLived.toLocaleString()} lived
+        <div className="flex items-stretch gap-2">
+          {/* LVL today */}
+          <div className="panel flex w-24 flex-none flex-col items-center bg-paper px-2 py-1">
+            <span className="font-pixel text-[7px] uppercase text-loops">lvl today</span>
+            <div className="flex items-baseline gap-0.5">
+              <span key={score.score} className="animate-pop font-pixel text-xl text-ink">
+                {score.score}
               </span>
-            </>
-          ) : (
-            <span className="text-2xl font-black leading-none text-hud-dim">...</span>
-          )}
-        </div>
-      </div>
+              <span className="font-pixel text-[9px] text-loops">/10</span>
+            </div>
+          </div>
 
-      {/* Life progress bar */}
-      <div className="h-1 w-full bg-hud-line">
-        <div
-          className="h-full bg-gradient-to-r from-life via-leverage to-visa transition-[width] duration-700"
-          style={{ width: `${life ? life.percentElapsed : 0}%` }}
-        />
+          {/* HP life bar */}
+          <div className="panel flex flex-1 flex-col justify-center bg-paper px-2 py-1">
+            <div className="flex items-center justify-between">
+              <span className="font-pixel text-[7px] uppercase text-health">hp · life left</span>
+              <span className="text-base leading-none text-ink">
+                {life ? `${life.daysLeft.toLocaleString()}d` : "..."}
+              </span>
+            </div>
+            <div className="bar mt-1 h-3 w-full overflow-hidden">
+              <div
+                className="h-full bg-health transition-[width] duration-700"
+                style={{ width: `${hpPct}%` }}
+              />
+            </div>
+            <span className="mt-0.5 text-sm leading-none text-loops">
+              {life ? `${life.percentElapsed.toFixed(1)}% of the game spent` : "loading the map"}
+            </span>
+          </div>
+        </div>
       </div>
     </header>
   );
