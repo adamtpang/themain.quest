@@ -4,13 +4,16 @@ import { useEffect, useMemo } from "react";
 import { AffirmationBanner } from "@/components/AffirmationBanner";
 import { BindingGoal } from "@/components/BindingGoal";
 import { CalendarPanel } from "@/components/CalendarPanel";
+import { FinnChat } from "@/components/FinnChat";
 import { Header } from "@/components/Header";
 import { KpiPanel } from "@/components/KpiPanel";
 import { LensCards } from "@/components/LensCards";
+import { ProblemsBoard } from "@/components/ProblemsBoard";
 import { QuestBoard } from "@/components/QuestBoard";
 import { Rungs } from "@/components/Rungs";
 import { bindingGoal, canBind, recommendedBinding } from "@/lib/board";
 import { defaultKpis, Kpi } from "@/lib/kpis";
+import { defaultProblems, Problem } from "@/lib/problems";
 import { computeScore } from "@/lib/score";
 import { todayStr, useLocalStorage } from "@/lib/storage";
 import {
@@ -25,6 +28,7 @@ import {
 const QUESTS_KEY = "tmq.quests";
 const DAY_KEY = "tmq.day";
 const KPIS_KEY = "tmq.kpis";
+const PROBLEMS_KEY = "tmq.problems";
 
 function freshDay(): DayState {
   return { date: todayStr(), rungs: freshRungs() };
@@ -34,6 +38,7 @@ export default function Page() {
   const [quests, setQuests] = useLocalStorage<Quest[]>(QUESTS_KEY, []);
   const [day, setDay, dayHydrated] = useLocalStorage<DayState>(DAY_KEY, freshDay());
   const [kpis, setKpis] = useLocalStorage<Kpi[]>(KPIS_KEY, defaultKpis());
+  const [problems, setProblems] = useLocalStorage<Problem[]>(PROBLEMS_KEY, defaultProblems());
 
   // Every day boots at 5/10: reset rungs when the date rolls over.
   useEffect(() => {
@@ -49,9 +54,40 @@ export default function Page() {
   const binding = useMemo(() => bindingGoal(quests), [quests]);
   const recommended = useMemo(() => recommendedBinding(quests), [quests]);
 
+  // Compact live state Finn reasons about.
+  const finnContext = useMemo(
+    () => ({
+      score: score.score,
+      winning: score.isWinning,
+      keystoneHit: score.keystoneDone,
+      boss: binding ? { title: binding.title, priority: binding.priority } : null,
+      recommendedBoss: recommended?.title ?? null,
+      rungs: day.rungs.map((r) => ({ n: r.n, label: r.label, done: r.done })),
+      openQuests: quests
+        .filter((q) => !q.done && q.passesMotionTest)
+        .slice(0, 12)
+        .map((q) => ({ title: q.title, priority: q.priority, time: q.scheduledTime })),
+      traps: quests.filter((q) => !q.passesMotionTest).map((q) => q.title),
+      problems: problems.map((p) => ({
+        title: p.title,
+        importance: p.importance,
+        urgency: p.urgency,
+        why: p.why,
+        beaten: p.beaten,
+      })),
+      kpis: kpis.map((k) => ({ label: k.label, value: k.value, max: k.max })),
+    }),
+    [score, binding, recommended, day, quests, problems, kpis]
+  );
+
   // ----- quest handlers -----
+  // Importing a parsed boss frees the current slot so only the new one is bound.
   function addQuests(parsed: Quest[]) {
-    setQuests((prev) => [...prev, ...parsed]);
+    const incomingBinding = parsed.some((q) => q.isBinding);
+    setQuests((prev) => {
+      const base = incomingBinding ? prev.map((q) => ({ ...q, isBinding: false })) : prev;
+      return [...base, ...parsed];
+    });
   }
 
   function toggleDone(id: string) {
@@ -150,6 +186,7 @@ export default function Page() {
         onSetBinding={setBinding}
         onDelete={deleteQuest}
       />
+      <ProblemsBoard problems={problems} onChange={setProblems} />
       <CalendarPanel />
       <LensCards />
       <KpiPanel kpis={kpis} onChange={setKpis} />
@@ -158,6 +195,7 @@ export default function Page() {
           the main quest · this dashboard is a Loops-tier build. now go strike the boss.
         </p>
       </footer>
+      <FinnChat context={finnContext} />
     </main>
   );
 }

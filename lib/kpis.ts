@@ -23,11 +23,11 @@ export type Kpi = {
 export function defaultKpis(): Kpi[] {
   return [
     { id: makeId(), emoji: "💰", label: "Money", value: 5, max: 10, color: "gold" },
+    { id: makeId(), emoji: "🎨", label: "Creative", value: 5, max: 10, color: "leverage" },
     { id: makeId(), emoji: "💚", label: "Health", value: 5, max: 10, color: "health" },
-    { id: makeId(), emoji: "💎", label: "Wealth", value: 5, max: 10, color: "visa" },
-    { id: makeId(), emoji: "🧠", label: "Wisdom", value: 5, max: 10, color: "leverage" },
     { id: makeId(), emoji: "❤️", label: "Relationships", value: 5, max: 10, color: "life" },
-    { id: makeId(), emoji: "🛠️", label: "Craft", value: 5, max: 10, color: "marketplace" },
+    { id: makeId(), emoji: "🧠", label: "Wisdom", value: 5, max: 10, color: "visa" },
+    { id: makeId(), emoji: "💎", label: "Wealth", value: 5, max: 10, color: "marketplace" },
   ];
 }
 

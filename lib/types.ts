@@ -7,6 +7,8 @@ export type Priority =
   | "Marketplace"
   | "Loops";
 
+export type RungN = 6 | 7 | 8 | 9 | 10;
+
 export type Quest = {
   id: string;
   title: string;
@@ -15,9 +17,9 @@ export type Quest = {
   done: boolean;
   isBinding: boolean; // only ONE quest can be true; must pass Motion Test
   createdAt: string;
+  scheduledTime?: string; // "10:30" parsed from an outbox ⏰ marker
+  rungHint?: RungN; // which rung this quest feeds, parsed from a 🧹6/🥇7/... tag
 };
-
-export type RungN = 6 | 7 | 8 | 9 | 10;
 
 export type Rung = {
   n: RungN;

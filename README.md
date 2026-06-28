@@ -42,6 +42,17 @@ Paste raw outbox lines (one per line). The app parses them into quests, auto-sug
 
 Next.js (App Router) + TypeScript + React + Tailwind. State in localStorage. No auth, no backend. Deploy target: Vercel.
 
+## Finn AI agent
+
+Finn is the in-app chatbot. He reads your live board (boss, rungs, quests, problems, KPIs) and helps you understand why your problems happen and beat them in the right order. He calls Claude (Sonnet 4.6) from a server route, so your API key never reaches the browser.
+
+To turn Finn on, set `ANTHROPIC_API_KEY`:
+
+- Local: copy `.env.example` to `.env.local` and paste your key.
+- Production: add `ANTHROPIC_API_KEY` in Vercel > Project > Settings > Environment Variables, then redeploy.
+
+Without a key, the rest of the app works and Finn politely says he is asleep.
+
 ## Run locally
 
 ```bash

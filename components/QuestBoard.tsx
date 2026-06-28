@@ -61,6 +61,17 @@ function QuestRow({
           )}
         </button>
 
+        {q.scheduledTime && (
+          <span className="tag inline-flex items-center bg-taxes px-1.5 py-px text-sm uppercase leading-none text-ink">
+            ⏰ {q.scheduledTime}
+          </span>
+        )}
+        {q.rungHint && (
+          <span className="tag inline-flex items-center bg-paper2 px-1.5 py-px text-sm uppercase leading-none text-ink">
+            rung {q.rungHint}
+          </span>
+        )}
+
         {eligible && !q.isBinding && (
           <button
             onClick={() => onSetBinding(q.id)}
