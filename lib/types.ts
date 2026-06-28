@@ -19,6 +19,7 @@ export type Quest = {
   createdAt: string;
   scheduledTime?: string; // "10:30" parsed from an outbox ⏰ marker
   rungHint?: RungN; // which rung this quest feeds, parsed from a 🧹6/🥇7/... tag
+  xpAwarded?: boolean; // true once this close has paid lifetime XP (never re-pays)
 };
 
 export type Rung = {

@@ -4,6 +4,7 @@ import { useEffect, useMemo } from "react";
 import { AffirmationBanner } from "@/components/AffirmationBanner";
 import { BindingGoal } from "@/components/BindingGoal";
 import { CalendarPanel } from "@/components/CalendarPanel";
+import { ClimbPanel } from "@/components/ClimbPanel";
 import { FinnChat } from "@/components/FinnChat";
 import { Header } from "@/components/Header";
 import { KpiPanel } from "@/components/KpiPanel";
@@ -14,6 +15,7 @@ import { Rungs } from "@/components/Rungs";
 import { bindingGoal, canBind, recommendedBinding } from "@/lib/board";
 import { defaultKpis, Kpi } from "@/lib/kpis";
 import { defaultProblems, Problem } from "@/lib/problems";
+import { levelInfo, Progress, rankForLevel, XP_BOSS_BONUS, XP_PER_QUEST } from "@/lib/progress";
 import { computeScore } from "@/lib/score";
 import { todayStr, useLocalStorage } from "@/lib/storage";
 import {
@@ -29,6 +31,7 @@ const QUESTS_KEY = "tmq.quests";
 const DAY_KEY = "tmq.day";
 const KPIS_KEY = "tmq.kpis";
 const PROBLEMS_KEY = "tmq.problems";
+const PROGRESS_KEY = "tmq.progress";
 
 function freshDay(): DayState {
   return { date: todayStr(), rungs: freshRungs() };
@@ -39,6 +42,7 @@ export default function Page() {
   const [day, setDay, dayHydrated] = useLocalStorage<DayState>(DAY_KEY, freshDay());
   const [kpis, setKpis] = useLocalStorage<Kpi[]>(KPIS_KEY, defaultKpis());
   const [problems, setProblems] = useLocalStorage<Problem[]>(PROBLEMS_KEY, defaultProblems());
+  const [progress, setProgress, progressHydrated] = useLocalStorage<Progress>(PROGRESS_KEY, { xp: 0 });
 
   // Every day boots at 5/10: reset rungs when the date rolls over.
   useEffect(() => {
@@ -57,6 +61,9 @@ export default function Page() {
   // Compact live state Finn reasons about.
   const finnContext = useMemo(
     () => ({
+      rank: rankForLevel(levelInfo(progress.xp).level).current.name,
+      level: levelInfo(progress.xp).level,
+      lifetimeXp: progress.xp,
       score: score.score,
       winning: score.isWinning,
       keystoneHit: score.keystoneDone,
@@ -77,7 +84,7 @@ export default function Page() {
       })),
       kpis: kpis.map((k) => ({ label: k.label, value: k.value, max: k.max })),
     }),
-    [score, binding, recommended, day, quests, problems, kpis]
+    [score, binding, recommended, day, quests, problems, kpis, progress]
   );
 
   // ----- quest handlers -----
@@ -94,16 +101,26 @@ export default function Page() {
     const q = quests.find((x) => x.id === id);
     if (!q) return;
     const done = !q.done;
-    const completingBinding = done && q.isBinding;
+    const wasBinding = q.isBinding;
+    const completingBinding = done && wasBinding;
+    // A real close pays lifetime XP exactly once. Motion pays nothing. The boss pays a bonus.
+    const award = done && q.passesMotionTest && !q.xpAwarded;
+    const xpGain = award ? XP_PER_QUEST + (wasBinding ? XP_BOSS_BONUS : 0) : 0;
     setQuests((prev) =>
       prev.map((x) =>
         x.id === id
-          ? { ...x, done, isBinding: completingBinding ? false : x.isBinding }
+          ? {
+              ...x,
+              done,
+              isBinding: completingBinding ? false : x.isBinding,
+              xpAwarded: award ? true : x.xpAwarded,
+            }
           : x
       )
     );
     // Closing the crowned goal hits the keystone rung (Goal hit).
     if (completingBinding) setRung(KEYSTONE_RUNG, true);
+    if (xpGain > 0) setProgress((p) => ({ ...p, xp: p.xp + xpGain }));
   }
 
   function cyclePriority(id: string) {
@@ -176,6 +193,7 @@ export default function Page() {
         onPromote={setBinding}
         onClear={clearBinding}
       />
+      <ClimbPanel xp={progress.xp} ready={progressHydrated} />
       <Rungs rungs={day.rungs} score={score} onToggle={toggleRung} />
       <QuestBoard
         quests={quests}
