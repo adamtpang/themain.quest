@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { Quest } from "@/lib/types";
 import { parseOutbox } from "@/lib/parse";
 import { sortQuests } from "@/lib/board";
+import { Algorithm } from "./Algorithm";
 import { MotionTag, PriorityTag } from "./PriorityTag";
 
 function QuestRow({
@@ -110,10 +111,12 @@ export function QuestBoard({
 }) {
   const [raw, setRaw] = useState("");
   const [open, setOpen] = useState(false);
+  const [algoOpen, setAlgoOpen] = useState(false);
 
   const sorted = useMemo(() => sortQuests(quests), [quests]);
   const real = sorted.filter((q) => q.passesMotionTest);
   const motion = sorted.filter((q) => !q.passesMotionTest);
+  const openReal = real.filter((q) => !q.done);
 
   function handleParse() {
     const parsed = parseOutbox(raw);
@@ -124,15 +127,32 @@ export function QuestBoard({
 
   return (
     <section className="mx-auto max-w-md px-3 pt-4">
-      <div className="mb-2 flex items-center justify-between">
+      <div className="mb-2 flex items-center justify-between gap-2">
         <h2 className="font-pixel text-[10px] uppercase text-ink">📜 quest log</h2>
-        <button
-          onClick={() => setOpen((v) => !v)}
-          className="btn bg-visa px-2 py-1 font-pixel text-[7px] uppercase text-paper"
-        >
-          {open ? "close" : "+ load outbox"}
-        </button>
+        <div className="flex items-center gap-1.5">
+          <button
+            onClick={() => setAlgoOpen(true)}
+            className="btn bg-ink px-2 py-1 font-pixel text-[7px] uppercase text-paper"
+          >
+            ⚙ algorithm
+          </button>
+          <button
+            onClick={() => setOpen((v) => !v)}
+            className="btn bg-visa px-2 py-1 font-pixel text-[7px] uppercase text-paper"
+          >
+            {open ? "close" : "+ load outbox"}
+          </button>
+        </div>
       </div>
+
+      {algoOpen && (
+        <Algorithm
+          quests={openReal}
+          onDelete={onDelete}
+          onSetBinding={onSetBinding}
+          onClose={() => setAlgoOpen(false)}
+        />
+      )}
 
       {open && (
         <div className="panel mb-3 bg-paper p-2">
