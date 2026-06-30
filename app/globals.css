@@ -106,6 +106,33 @@ textarea {
   font-family: var(--font-vt), monospace;
 }
 
+/* game-feel juice */
+@keyframes floatup {
+  0% { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-52px) scale(1.4); }
+}
+.floatup {
+  animation: floatup 0.9s ease-out forwards;
+}
+@keyframes hitshake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-5px) rotate(-1deg); }
+  40% { transform: translateX(5px) rotate(1deg); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+.hitshake {
+  animation: hitshake 0.32s ease-in-out;
+}
+@keyframes cardplay {
+  0% { transform: translateY(0) scale(1); }
+  60% { transform: translateY(-14px) scale(1.06); }
+  100% { transform: translateY(0) scale(1); }
+}
+.cardplay {
+  animation: cardplay 0.28s ease-out;
+}
+
 /* pixel scrollbar */
 ::-webkit-scrollbar {
   width: 12px;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AffirmationBanner } from "@/components/AffirmationBanner";
 import { BindingGoal } from "@/components/BindingGoal";
 import { CalendarPanel } from "@/components/CalendarPanel";
@@ -13,6 +13,7 @@ import { ProblemsBoard } from "@/components/ProblemsBoard";
 import { QuestBoard } from "@/components/QuestBoard";
 import { Rungs } from "@/components/Rungs";
 import { SchoolsPanel } from "@/components/SchoolsPanel";
+import { TheBoard } from "@/components/TheBoard";
 import { bindingGoal, canBind, recommendedBinding } from "@/lib/board";
 import { freshSchools, SCHOOL_IDS, SCHOOL_META, SCHOOL_OF, schoolLevel, Schools } from "@/lib/schools";
 import {
@@ -62,6 +63,7 @@ export default function Page() {
   const [progress, setProgress, progressHydrated] = useLocalStorage<Progress>(PROGRESS_KEY, { xp: 0 });
   const [match, setMatch, matchHydrated] = useLocalStorage<MatchState>(MATCH_KEY, freshMatch(todayStr()));
   const [streak, setStreak, streakHydrated] = useLocalStorage<Streak>(STREAK_KEY, freshStreak());
+  const [boardOpen, setBoardOpen] = useState(false);
 
   // Every day boots at 5/10: reset rungs when the date rolls over.
   useEffect(() => {
@@ -342,6 +344,27 @@ export default function Page() {
         </p>
       </footer>
       <FinnChat context={finnContext} />
+
+      {/* Play the turn: the interactive board */}
+      <button
+        onClick={() => setBoardOpen(true)}
+        className="btn fixed bottom-4 left-3 z-40 flex items-center gap-1.5 bg-life px-3 py-2 font-pixel text-[9px] uppercase text-paper"
+        aria-label="play the board"
+      >
+        ▶ play
+      </button>
+      {boardOpen && (
+        <TheBoard
+          boss={binding}
+          hand={quests.filter((q) => q.passesMotionTest && !q.done && !q.isBinding)}
+          match={match}
+          lethal={isLethal(match, !!binding)}
+          onCloseQuest={toggleDone}
+          onStartFocus={startFocus}
+          onGiveUpFocus={giveUpFocus}
+          onClose={() => setBoardOpen(false)}
+        />
+      )}
     </main>
   );
 }
