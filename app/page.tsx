@@ -7,14 +7,14 @@ import { CalendarPanel } from "@/components/CalendarPanel";
 import { ClimbPanel } from "@/components/ClimbPanel";
 import { FinnChat } from "@/components/FinnChat";
 import { Header } from "@/components/Header";
-import { KpiPanel } from "@/components/KpiPanel";
 import { LensCards } from "@/components/LensCards";
 import { MatchPanel } from "@/components/MatchPanel";
 import { ProblemsBoard } from "@/components/ProblemsBoard";
 import { QuestBoard } from "@/components/QuestBoard";
 import { Rungs } from "@/components/Rungs";
+import { SchoolsPanel } from "@/components/SchoolsPanel";
 import { bindingGoal, canBind, recommendedBinding } from "@/lib/board";
-import { defaultKpis, Kpi } from "@/lib/kpis";
+import { freshSchools, SCHOOL_IDS, SCHOOL_META, SCHOOL_OF, schoolLevel, Schools } from "@/lib/schools";
 import {
   bossRemaining,
   crystalsLeft,
@@ -40,7 +40,7 @@ import {
 
 const QUESTS_KEY = "tmq.quests";
 const DAY_KEY = "tmq.day";
-const KPIS_KEY = "tmq.kpis";
+const SCHOOLS_KEY = "tmq.schools";
 const PROBLEMS_KEY = "tmq.problems";
 const PROGRESS_KEY = "tmq.progress";
 const MATCH_KEY = "tmq.match";
@@ -57,7 +57,7 @@ function freshDay(): DayState {
 export default function Page() {
   const [quests, setQuests] = useLocalStorage<Quest[]>(QUESTS_KEY, []);
   const [day, setDay, dayHydrated] = useLocalStorage<DayState>(DAY_KEY, freshDay());
-  const [kpis, setKpis] = useLocalStorage<Kpi[]>(KPIS_KEY, defaultKpis());
+  const [schools, setSchools] = useLocalStorage<Schools>(SCHOOLS_KEY, freshSchools());
   const [problems, setProblems] = useLocalStorage<Problem[]>(PROBLEMS_KEY, defaultProblems());
   const [progress, setProgress, progressHydrated] = useLocalStorage<Progress>(PROGRESS_KEY, { xp: 0 });
   const [match, setMatch, matchHydrated] = useLocalStorage<MatchState>(MATCH_KEY, freshMatch(todayStr()));
@@ -167,9 +167,9 @@ export default function Page() {
         why: p.why,
         beaten: p.beaten,
       })),
-      kpis: kpis.map((k) => ({ label: k.label, value: k.value, max: k.max })),
+      schools: SCHOOL_IDS.map((id) => ({ name: SCHOOL_META[id].name, level: schoolLevel(schools[id]) })),
     }),
-    [score, binding, recommended, day, quests, problems, kpis, progress, match, streak]
+    [score, binding, recommended, day, quests, problems, schools, progress, match, streak]
   );
 
   // ----- quest handlers -----
@@ -205,7 +205,11 @@ export default function Page() {
     );
     // Closing the crowned goal hits the keystone rung (Goal hit).
     if (completingBinding) setRung(KEYSTONE_RUNG, true);
-    if (xpGain > 0) setProgress((p) => ({ ...p, xp: p.xp + xpGain }));
+    if (xpGain > 0) {
+      setProgress((p) => ({ ...p, xp: p.xp + xpGain }));
+      const sid = SCHOOL_OF[q.priority]; // the same close levels its school
+      setSchools((s) => ({ ...s, [sid]: s[sid] + xpGain }));
+    }
   }
 
   function cyclePriority(id: string) {
@@ -331,7 +335,7 @@ export default function Page() {
       <ProblemsBoard problems={problems} onChange={setProblems} />
       <CalendarPanel />
       <LensCards />
-      <KpiPanel kpis={kpis} onChange={setKpis} />
+      <SchoolsPanel schools={schools} />
       <footer className="mx-auto max-w-md px-3 pt-6 text-center">
         <p className="font-pixel text-[7px] uppercase leading-relaxed text-ink/70">
           the main quest · this dashboard is a Loops-tier build. now go strike the boss.
