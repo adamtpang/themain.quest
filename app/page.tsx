@@ -9,11 +9,21 @@ import { FinnChat } from "@/components/FinnChat";
 import { Header } from "@/components/Header";
 import { KpiPanel } from "@/components/KpiPanel";
 import { LensCards } from "@/components/LensCards";
+import { MatchPanel } from "@/components/MatchPanel";
 import { ProblemsBoard } from "@/components/ProblemsBoard";
 import { QuestBoard } from "@/components/QuestBoard";
 import { Rungs } from "@/components/Rungs";
 import { bindingGoal, canBind, recommendedBinding } from "@/lib/board";
 import { defaultKpis, Kpi } from "@/lib/kpis";
+import {
+  bossRemaining,
+  crystalsLeft,
+  DEFAULT_BOSS_HP,
+  FOCUS_MINUTES,
+  freshMatch,
+  isLethal,
+  MatchState,
+} from "@/lib/match";
 import { defaultProblems, Problem } from "@/lib/problems";
 import { levelInfo, Progress, rankForLevel, XP_BOSS_BONUS, XP_PER_QUEST } from "@/lib/progress";
 import { computeScore } from "@/lib/score";
@@ -32,6 +42,7 @@ const DAY_KEY = "tmq.day";
 const KPIS_KEY = "tmq.kpis";
 const PROBLEMS_KEY = "tmq.problems";
 const PROGRESS_KEY = "tmq.progress";
+const MATCH_KEY = "tmq.match";
 
 function freshDay(): DayState {
   return { date: todayStr(), rungs: freshRungs() };
@@ -43,6 +54,7 @@ export default function Page() {
   const [kpis, setKpis] = useLocalStorage<Kpi[]>(KPIS_KEY, defaultKpis());
   const [problems, setProblems] = useLocalStorage<Problem[]>(PROBLEMS_KEY, defaultProblems());
   const [progress, setProgress, progressHydrated] = useLocalStorage<Progress>(PROGRESS_KEY, { xp: 0 });
+  const [match, setMatch, matchHydrated] = useLocalStorage<MatchState>(MATCH_KEY, freshMatch(todayStr()));
 
   // Every day boots at 5/10: reset rungs when the date rolls over.
   useEffect(() => {
@@ -58,12 +70,61 @@ export default function Page() {
   const binding = useMemo(() => bindingGoal(quests), [quests]);
   const recommended = useMemo(() => recommendedBinding(quests), [quests]);
 
+  // The match resets daily, and the boss HP tracks whichever goal is crowned.
+  useEffect(() => {
+    if (!matchHydrated) return;
+    const today = todayStr();
+    if (match.date !== today) {
+      setMatch(freshMatch(today));
+      return;
+    }
+    if (binding && match.bossId !== binding.id) {
+      setMatch((m) => ({
+        ...m,
+        bossId: binding.id,
+        bossHpMax: DEFAULT_BOSS_HP,
+        bossHpDone: 0,
+        focusEndsAt: m.focusQuestId === m.bossId ? null : m.focusEndsAt,
+        focusQuestId: m.focusQuestId === m.bossId ? null : m.focusQuestId,
+      }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [matchHydrated, match.date, binding?.id]);
+
+  // The rope: complete a focus block when its timer runs out (even if we were away).
+  useEffect(() => {
+    if (!matchHydrated || !match.focusEndsAt) return;
+    const check = () => {
+      if (Date.now() >= match.focusEndsAt!) completeBlock();
+    };
+    check();
+    const id = setInterval(check, 1000);
+    return () => clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [matchHydrated, match.focusEndsAt]);
+
+  // Lethal landed: the boss HP hit zero, so strike it dead (pays the climb XP + rung 7).
+  useEffect(() => {
+    if (!matchHydrated) return;
+    if (match.bossId && match.bossHpDone >= match.bossHpMax) {
+      const boss = quests.find((q) => q.id === match.bossId);
+      if (boss && boss.isBinding && !boss.done) toggleDone(match.bossId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [matchHydrated, match.bossHpDone, match.bossHpMax, match.bossId, quests]);
+
   // Compact live state Finn reasons about.
   const finnContext = useMemo(
     () => ({
       rank: rankForLevel(levelInfo(progress.xp).level).current.name,
       level: levelInfo(progress.xp).level,
       lifetimeXp: progress.xp,
+      match: {
+        crystalsLeft: crystalsLeft(match),
+        bossHpRemaining: binding ? bossRemaining(match) : null,
+        lethal: isLethal(match, !!binding),
+        focusing: !!match.focusEndsAt,
+      },
       score: score.score,
       winning: score.isWinning,
       keystoneHit: score.keystoneDone,
@@ -84,7 +145,7 @@ export default function Page() {
       })),
       kpis: kpis.map((k) => ({ label: k.label, value: k.value, max: k.max })),
     }),
-    [score, binding, recommended, day, quests, problems, kpis, progress]
+    [score, binding, recommended, day, quests, problems, kpis, progress, match]
   );
 
   // ----- quest handlers -----
@@ -182,6 +243,33 @@ export default function Page() {
     }));
   }
 
+  // ----- match handlers -----
+  function completeBlock() {
+    setMatch((m) => {
+      if (!m.focusEndsAt) return m; // already resolved, stay idempotent
+      const onBoss = m.focusQuestId != null && m.focusQuestId === m.bossId;
+      return {
+        ...m,
+        spent: m.spent + 1,
+        bossHpDone: onBoss ? Math.min(m.bossHpMax, m.bossHpDone + 1) : m.bossHpDone,
+        focusEndsAt: null,
+        focusQuestId: null,
+      };
+    });
+  }
+
+  function startFocus() {
+    if (!binding) return;
+    setMatch((m) => {
+      if (crystalsLeft(m) <= 0) return m;
+      return { ...m, focusEndsAt: Date.now() + FOCUS_MINUTES * 60000, focusQuestId: binding.id };
+    });
+  }
+
+  function giveUpFocus() {
+    setMatch((m) => ({ ...m, focusEndsAt: null, focusQuestId: null }));
+  }
+
   return (
     <main className="min-h-screen pb-24">
       <Header score={score} />
@@ -192,6 +280,18 @@ export default function Page() {
         onComplete={completeBinding}
         onPromote={setBinding}
         onClear={clearBinding}
+      />
+      <MatchPanel
+        hasBoss={!!binding}
+        bossTitle={binding?.title}
+        crystals={match.crystals}
+        spent={match.spent}
+        bossHpMax={match.bossHpMax}
+        bossHpDone={match.bossHpDone}
+        lethal={isLethal(match, !!binding)}
+        focusEndsAt={match.focusEndsAt}
+        onStart={startFocus}
+        onGiveUp={giveUpFocus}
       />
       <ClimbPanel xp={progress.xp} ready={progressHydrated} />
       <Rungs rungs={day.rungs} score={score} onToggle={toggleRung} />
