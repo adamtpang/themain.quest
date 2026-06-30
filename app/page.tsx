@@ -272,7 +272,7 @@ export default function Page() {
 
   return (
     <main className="min-h-screen pb-24">
-      <Header score={score} />
+      <Header score={score} lethal={isLethal(match, !!binding)} />
       <AffirmationBanner />
       <BindingGoal
         binding={binding}

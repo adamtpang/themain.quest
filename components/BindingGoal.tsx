@@ -1,12 +1,8 @@
 "use client";
 
 import { Quest } from "@/lib/types";
-import { PRIORITY_ORDER } from "@/lib/types";
+import { outranksForBoss } from "@/lib/board";
 import { PriorityTag } from "./PriorityTag";
-
-function rank(p: Quest["priority"]) {
-  return PRIORITY_ORDER.indexOf(p);
-}
 
 export function BindingGoal({
   binding,
@@ -22,7 +18,7 @@ export function BindingGoal({
   onClear: () => void;
 }) {
   const harderExists =
-    binding && recommended && recommended.id !== binding.id && rank(recommended.priority) < rank(binding.priority);
+    binding && recommended && recommended.id !== binding.id && outranksForBoss(recommended, binding);
 
   return (
     <section className="mx-auto max-w-md px-3 pt-3">

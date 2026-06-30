@@ -1,8 +1,8 @@
 // The Match: today's Hearthstone-style loop. Focus crystals are mana, the boss
 // has HP you chip with focus blocks, and "lethal" fires when you can close it today.
 
-export const FOCUS_MINUTES = 25;
-export const DEFAULT_CRYSTALS = 8; // focus blocks available per day
+export const FOCUS_MINUTES = 50; // a deep block, two pomodoros, the deep-work sweet spot
+export const DEFAULT_CRYSTALS = 4; // ~4 deep blocks a day, the research cap on real focus
 export const DEFAULT_BOSS_HP = 3; // focus blocks to strike the boss dead
 
 export type MatchState = {

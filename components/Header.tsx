@@ -11,7 +11,7 @@ function scoreMood(s: ScoreResult): { label: string; bg: string } {
   return { label: "warming up", bg: "bg-visa" };
 }
 
-export function Header({ score }: { score: ScoreResult }) {
+export function Header({ score, lethal = false }: { score: ScoreResult; lethal?: boolean }) {
   const [life, setLife] = useState<LifeLeft | null>(null);
   useEffect(() => setLife(computeLifeLeft()), []);
 
@@ -27,9 +27,16 @@ export function Header({ score }: { score: ScoreResult }) {
             <span className="animate-bob text-base">❤️</span>
             the main quest
           </h1>
-          <span className={`tag ${mood.bg} px-1.5 py-px text-sm uppercase leading-none text-ink`}>
-            {mood.label}
-          </span>
+          <div className="flex items-center gap-1.5">
+            {lethal && (
+              <span className="tag animate-glow bg-life px-1.5 py-px font-pixel text-[7px] uppercase leading-none text-paper">
+                ⚡ lethal
+              </span>
+            )}
+            <span className={`tag ${mood.bg} px-1.5 py-px text-sm uppercase leading-none text-ink`}>
+              {mood.label}
+            </span>
+          </div>
         </div>
 
         <div className="flex items-stretch gap-2">

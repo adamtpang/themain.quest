@@ -22,12 +22,25 @@ export function sortQuests(quests: Quest[]): Quest[] {
   });
 }
 
-// The hardest OPEN close = highest-priority open quest that passes the Motion Test.
-// This is what the binding-goal slot should hold; the app nudges toward it.
+// The income lanes. The app's #1 job is to point Adam at the highest-leverage
+// income close, so the boss recommendation puts these first.
+const INCOME = new Set<Priority>(["Leverage", "Marketplace"]);
+
+function bossScore(q: Quest): number {
+  return (INCOME.has(q.priority) ? 0 : 1) * 100 + priorityRank[q.priority];
+}
+
+// True when `a` is a higher-leverage boss than `b`: income first, then priority.
+export function outranksForBoss(a: Quest, b: Quest): boolean {
+  return bossScore(a) < bossScore(b);
+}
+
+// The boss the app suggests: the hardest OPEN income close that passes the
+// Motion Test, falling back to the top priority lane if there is no income quest.
 export function recommendedBinding(quests: Quest[]): Quest | null {
   const eligible = quests
     .filter((q) => q.passesMotionTest && !q.done)
-    .sort((a, b) => priorityRank[a.priority] - priorityRank[b.priority]);
+    .sort((a, b) => bossScore(a) - bossScore(b));
   return eligible[0] ?? null;
 }
 
