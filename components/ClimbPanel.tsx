@@ -3,7 +3,17 @@
 import { useEffect, useRef, useState } from "react";
 import { levelInfo, RANKS, rankForLevel } from "@/lib/progress";
 
-export function ClimbPanel({ xp, ready }: { xp: number; ready: boolean }) {
+export function ClimbPanel({
+  xp,
+  ready,
+  streak = 0,
+  bestStreak = 0,
+}: {
+  xp: number;
+  ready: boolean;
+  streak?: number;
+  bestStreak?: number;
+}) {
   const info = levelInfo(xp);
   const { current, next, levelsToNext } = rankForLevel(info.level);
 
@@ -44,7 +54,14 @@ export function ClimbPanel({ xp, ready }: { xp: number; ready: boolean }) {
       <div className="panel relative overflow-hidden bg-paper p-3">
         <div className="mb-2 flex items-center justify-between">
           <span className="font-pixel text-[8px] uppercase text-ink">🏆 the climb</span>
-          <span className="font-pixel text-[6px] uppercase text-ink/50">lifetime · never resets</span>
+          {streak > 0 ? (
+            <span className="tag bg-taxes px-1.5 py-px font-pixel text-[7px] uppercase leading-none text-ink">
+              🔥 {streak} day{streak === 1 ? "" : "s"}
+              {bestStreak > streak ? ` · best ${bestStreak}` : ""}
+            </span>
+          ) : (
+            <span className="font-pixel text-[6px] uppercase text-ink/50">strike the boss to start a streak</span>
+          )}
         </div>
 
         <div className="flex items-end justify-between">

@@ -27,6 +27,7 @@ import {
 import { defaultProblems, Problem } from "@/lib/problems";
 import { levelInfo, Progress, rankForLevel, XP_BOSS_BONUS, XP_PER_QUEST } from "@/lib/progress";
 import { computeScore } from "@/lib/score";
+import { freshStreak, recordWin, refreshStreak, Streak } from "@/lib/streak";
 import { todayStr, useLocalStorage } from "@/lib/storage";
 import {
   DayState,
@@ -43,6 +44,11 @@ const KPIS_KEY = "tmq.kpis";
 const PROBLEMS_KEY = "tmq.problems";
 const PROGRESS_KEY = "tmq.progress";
 const MATCH_KEY = "tmq.match";
+const STREAK_KEY = "tmq.streak";
+
+function yesterdayStr(): string {
+  return todayStr(new Date(Date.now() - 86400000));
+}
 
 function freshDay(): DayState {
   return { date: todayStr(), rungs: freshRungs() };
@@ -55,6 +61,7 @@ export default function Page() {
   const [problems, setProblems] = useLocalStorage<Problem[]>(PROBLEMS_KEY, defaultProblems());
   const [progress, setProgress, progressHydrated] = useLocalStorage<Progress>(PROGRESS_KEY, { xp: 0 });
   const [match, setMatch, matchHydrated] = useLocalStorage<MatchState>(MATCH_KEY, freshMatch(todayStr()));
+  const [streak, setStreak, streakHydrated] = useLocalStorage<Streak>(STREAK_KEY, freshStreak());
 
   // Every day boots at 5/10: reset rungs when the date rolls over.
   useEffect(() => {
@@ -113,12 +120,29 @@ export default function Page() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [matchHydrated, match.bossHpDone, match.bossHpMax, match.bossId, quests]);
 
+  // Win streak: striking the boss (keystone hit) extends the chain. A missed day breaks it.
+  useEffect(() => {
+    if (!streakHydrated) return;
+    setStreak((s) => refreshStreak(s, todayStr(), yesterdayStr()));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [streakHydrated, day.date]);
+
+  useEffect(() => {
+    if (!streakHydrated) return;
+    if (score.keystoneDone) {
+      setStreak((s) => recordWin(s, todayStr(), yesterdayStr()));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [streakHydrated, score.keystoneDone]);
+
   // Compact live state Finn reasons about.
   const finnContext = useMemo(
     () => ({
       rank: rankForLevel(levelInfo(progress.xp).level).current.name,
       level: levelInfo(progress.xp).level,
       lifetimeXp: progress.xp,
+      streak: streak.current,
+      bestStreak: streak.best,
       match: {
         crystalsLeft: crystalsLeft(match),
         bossHpRemaining: binding ? bossRemaining(match) : null,
@@ -145,7 +169,7 @@ export default function Page() {
       })),
       kpis: kpis.map((k) => ({ label: k.label, value: k.value, max: k.max })),
     }),
-    [score, binding, recommended, day, quests, problems, kpis, progress, match]
+    [score, binding, recommended, day, quests, problems, kpis, progress, match, streak]
   );
 
   // ----- quest handlers -----
@@ -293,7 +317,7 @@ export default function Page() {
         onStart={startFocus}
         onGiveUp={giveUpFocus}
       />
-      <ClimbPanel xp={progress.xp} ready={progressHydrated} />
+      <ClimbPanel xp={progress.xp} ready={progressHydrated} streak={streak.current} bestStreak={streak.best} />
       <Rungs rungs={day.rungs} score={score} onToggle={toggleRung} />
       <QuestBoard
         quests={quests}
