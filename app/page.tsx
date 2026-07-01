@@ -13,6 +13,7 @@ import { ProblemsBoard } from "@/components/ProblemsBoard";
 import { QuestBoard } from "@/components/QuestBoard";
 import { Rungs } from "@/components/Rungs";
 import { SchoolsPanel } from "@/components/SchoolsPanel";
+import { SelfAuthoring } from "@/components/SelfAuthoring";
 import { TheBoard } from "@/components/TheBoard";
 import { bindingGoal, canBind, recommendedBinding } from "@/lib/board";
 import { freshSchools, SCHOOL_IDS, SCHOOL_META, SCHOOL_OF, schoolLevel, Schools } from "@/lib/schools";
@@ -335,6 +336,7 @@ export default function Page() {
         onDelete={deleteQuest}
       />
       <ProblemsBoard problems={problems} onChange={setProblems} />
+      <SelfAuthoring />
       <CalendarPanel />
       <LensCards />
       <SchoolsPanel schools={schools} />
