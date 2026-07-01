@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Quest } from "@/lib/types";
 import { FOCUS_MINUTES, MatchState } from "@/lib/match";
 import { SCHOOL_META, SCHOOL_OF } from "@/lib/schools";
+import { sfxPlay, sfxAttack, sfxKill, sfxToggleMute, sfxIsMuted } from "@/lib/sfx";
 
 let floatId = 0;
 
@@ -34,6 +35,9 @@ export function TheBoard({
   const [floaters, setFloaters] = useState<{ id: number; text: string }[]>([]);
   const [shake, setShake] = useState(0);
   const [now, setNow] = useState(0);
+  const [victory, setVictory] = useState(false);
+  const [mutedUi, setMutedUi] = useState(false);
+  const prevDone = useRef(match.bossHpDone);
 
   useEffect(() => {
     setNow(Date.now());
@@ -41,6 +45,21 @@ export function TheBoard({
     const t = setInterval(() => setNow(Date.now()), 250);
     return () => clearInterval(t);
   }, [match.focusEndsAt]);
+
+  // The boss just died: HP crossed to full-struck. Ring the victory bell.
+  useEffect(() => {
+    const killed =
+      match.bossHpMax > 0 &&
+      match.bossHpDone >= match.bossHpMax &&
+      prevDone.current < match.bossHpMax;
+    prevDone.current = match.bossHpDone;
+    if (killed) {
+      sfxKill();
+      setVictory(true);
+      const t = setTimeout(() => setVictory(false), 2000);
+      return () => clearTimeout(t);
+    }
+  }, [match.bossHpDone, match.bossHpMax]);
 
   function hit(text: string) {
     const id = ++floatId;
@@ -50,8 +69,14 @@ export function TheBoard({
   }
 
   function play(q: Quest) {
+    sfxPlay();
     hit(`+${q.isBinding ? 100 : 25}`);
     onCloseQuest(q.id);
+  }
+
+  function attack() {
+    sfxAttack();
+    onStartFocus();
   }
 
   const crystalsLeft = Math.max(0, match.crystals - match.spent);
@@ -61,11 +86,27 @@ export function TheBoard({
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-ink/95">
+      {victory && (
+        <div className="pointer-events-none absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 bg-ink/70">
+          <span className="cardplay text-6xl">💥</span>
+          <span className="hitshake font-pixel text-xl uppercase text-gold">boss down</span>
+          <span className="font-pixel text-[9px] uppercase text-health">+100 xp · streak +1</span>
+        </div>
+      )}
       <div className="flex items-center justify-between border-b-4 border-ink bg-visa px-3 py-2">
         <span className="font-pixel text-[10px] uppercase text-paper">⚔ the board</span>
-        <button onClick={onClose} className="font-pixel text-[10px] text-paper/80 hover:text-paper">
-          x
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setMutedUi(sfxToggleMute())}
+            className="font-pixel text-[10px] text-paper/80 hover:text-paper"
+            aria-label="toggle sound"
+          >
+            {mutedUi || sfxIsMuted() ? "🔇" : "🔊"}
+          </button>
+          <button onClick={onClose} className="font-pixel text-[10px] text-paper/80 hover:text-paper">
+            x
+          </button>
+        </div>
       </div>
 
       {/* mana + lethal */}
@@ -134,7 +175,7 @@ export function TheBoard({
               </div>
             ) : (
               <button
-                onClick={onStartFocus}
+                onClick={attack}
                 disabled={crystalsLeft <= 0}
                 className="btn w-full max-w-xs bg-life py-3 font-pixel text-[11px] uppercase text-paper disabled:opacity-50"
               >
