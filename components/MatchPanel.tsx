@@ -1,7 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FOCUS_MINUTES } from "@/lib/match";
+import {
+  bossRemaining,
+  crystalsLeft,
+  FOCUS_MINUTES,
+  matchPhase,
+  MatchState,
+} from "@/lib/match";
 
 function clock(ms: number): string {
   const s = Math.max(0, Math.floor(ms / 1000));
@@ -10,40 +16,46 @@ function clock(ms: number): string {
   return `${m}:${String(r).padStart(2, "0")}`;
 }
 
+// Camp-side status card. Every action lives on the board; this just reports
+// the match and holds the one door back into it.
 export function MatchPanel({
   hasBoss,
   bossTitle,
-  crystals,
-  spent,
-  bossHpMax,
-  bossHpDone,
+  match,
   lethal,
-  focusEndsAt,
-  onStart,
-  onGiveUp,
+  onEnter,
 }: {
   hasBoss: boolean;
   bossTitle?: string;
-  crystals: number;
-  spent: number;
-  bossHpMax: number;
-  bossHpDone: number;
+  match: MatchState;
   lethal: boolean;
-  focusEndsAt: number | null;
-  onStart: () => void;
-  onGiveUp: () => void;
+  onEnter: () => void;
 }) {
   const [now, setNow] = useState(0);
   useEffect(() => {
     setNow(Date.now());
-    if (!focusEndsAt) return;
-    const id = setInterval(() => setNow(Date.now()), 250);
+    if (!match.focusEndsAt && !match.breakEndsAt) return;
+    const id = setInterval(() => setNow(Date.now()), 500);
     return () => clearInterval(id);
-  }, [focusEndsAt]);
+  }, [match.focusEndsAt, match.breakEndsAt]);
 
-  const left = Math.max(0, crystals - spent);
-  const focusing = !!focusEndsAt;
-  const remainingMs = focusEndsAt ? focusEndsAt - now : 0;
+  const left = crystalsLeft(match);
+  const remaining = bossRemaining(match);
+  const nowSafe = now > 0 ? now : Date.now();
+  const phase = matchPhase(match, hasBoss, nowSafe);
+
+  const statusLine =
+    phase === "focus"
+      ? `in a turn · killing: ${match.focusGoal} · ${clock(match.focusEndsAt! - nowSafe)}`
+      : phase === "resolve"
+        ? "turn over. check in on the board."
+        : phase === "break"
+          ? `opponent's turn · ${clock(match.breakEndsAt! - nowSafe)}`
+          : phase === "out_of_mana"
+            ? `0 mana. you dealt ${match.bossHpDone}/${match.bossHpMax}. rematch at dawn.`
+            : phase === "no_boss"
+              ? "no boss on the field yet."
+              : `your turn. ${left} crystals left.`;
 
   return (
     <section className="mx-auto max-w-md px-3 pt-3">
@@ -57,72 +69,48 @@ export function MatchPanel({
         <div className="flex items-center gap-1.5">
           <span className="font-pixel text-[7px] uppercase text-visa">mana</span>
           <div className="flex flex-wrap gap-0.5">
-            {Array.from({ length: crystals }).map((_, i) => (
+            {Array.from({ length: match.crystals }).map((_, i) => (
               <span
                 key={i}
                 className={`h-3 w-3 rotate-45 border-2 border-ink ${i < left ? "bg-visa" : "bg-paper2"}`}
               />
             ))}
           </div>
-          <span className="ml-auto text-sm text-ink/70">{left} blocks left</span>
+          <span className="ml-auto text-sm text-ink/70">{left} turns left</span>
         </div>
 
         {/* boss HP */}
-        {hasBoss ? (
+        {hasBoss && (
           <div className="mt-3">
             <div className="flex items-center justify-between">
               <span className="font-pixel text-[7px] uppercase text-life">boss hp</span>
-              <span className="text-sm text-ink/70">{bossHpDone}/{bossHpMax} struck</span>
+              <span className="text-sm text-ink/70">{match.bossHpDone}/{match.bossHpMax} struck</span>
             </div>
             <div className="mt-1 flex gap-1">
-              {Array.from({ length: bossHpMax }).map((_, i) => (
+              {Array.from({ length: match.bossHpMax }).map((_, i) => (
                 <span
                   key={i}
-                  className={`h-4 flex-1 border-2 border-ink ${i < bossHpMax - bossHpDone ? "bg-life" : "bg-paper2"}`}
+                  className={`h-4 flex-1 border-2 border-ink ${i < remaining ? "bg-life" : "bg-paper2"}`}
                 />
               ))}
             </div>
             <p className="mt-1 truncate text-sm text-ink/60">{bossTitle}</p>
-
-            {lethal && !focusing && (
-              <p className="mt-2 animate-flash font-pixel text-[9px] uppercase text-life">
+            {lethal && (
+              <p className="mt-1 animate-flash font-pixel text-[9px] uppercase text-life">
                 ⚡ lethal. you can close the boss today.
               </p>
             )}
-
-            {/* the rope */}
-            {focusing ? (
-              <div className="mt-2">
-                <div className="bar h-6 w-full overflow-hidden">
-                  <div
-                    className="flex h-full items-center justify-center bg-health font-pixel text-[10px] text-ink transition-[width] duration-300"
-                    style={{ width: `${Math.min(100, Math.max(6, (remainingMs / (FOCUS_MINUTES * 60000)) * 100))}%` }}
-                  >
-                    {clock(remainingMs)}
-                  </div>
-                </div>
-                <button
-                  onClick={onGiveUp}
-                  className="mt-2 w-full font-pixel text-[7px] uppercase text-ink/50 hover:text-life"
-                >
-                  give up the turn (no credit)
-                </button>
-              </div>
-            ) : (
-              <button
-                onClick={onStart}
-                disabled={left <= 0}
-                className="btn mt-2 w-full bg-life py-2 font-pixel text-[10px] uppercase text-paper disabled:opacity-50"
-              >
-                {left <= 0 ? "out of mana today" : "⚔ attack boss · start focus"}
-              </button>
-            )}
           </div>
-        ) : (
-          <p className="mt-3 inset px-2 py-2 text-base text-ink/70">
-            Crown a boss to start the match. Then spend mana to chip its HP.
-          </p>
         )}
+
+        <p className="mt-2 truncate text-sm text-ink/70">{statusLine}</p>
+
+        <button
+          onClick={onEnter}
+          className="btn mt-2 w-full bg-life py-3 font-pixel text-[11px] uppercase text-paper"
+        >
+          ▶ enter the match
+        </button>
       </div>
     </section>
   );
