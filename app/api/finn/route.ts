@@ -60,19 +60,24 @@ function buildContextNote(context: unknown): string {
 }
 
 export async function POST(req: Request) {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) {
-    return new Response(
-      "Finn is asleep. Add your ANTHROPIC_API_KEY to the environment (Vercel project settings, and a local .env.local) and wake him up.",
-      { status: 200, headers: { "Content-Type": "text/plain; charset=utf-8" } }
-    );
-  }
-
   let body: { messages?: ChatMsg[]; context?: unknown; mode?: string; program?: string };
   try {
     body = await req.json();
   } catch {
     return new Response("Bad request", { status: 400 });
+  }
+
+  const authoring = body.mode === "author" && body.program && AUTHOR_PROGRAM[body.program];
+
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) {
+    const asleep = authoring
+      ? "The Author is resting. Add your ANTHROPIC_API_KEY to the environment (Vercel project settings, and a local .env.local) to start the interview."
+      : "Finn is asleep. Add your ANTHROPIC_API_KEY to the environment (Vercel project settings, and a local .env.local) and wake him up.";
+    return new Response(asleep, {
+      status: 200,
+      headers: { "Content-Type": "text/plain; charset=utf-8" },
+    });
   }
 
   const messages = (body.messages ?? []).filter((m) => m && m.content?.trim());
@@ -81,7 +86,6 @@ export async function POST(req: Request) {
   }
 
   const client = new Anthropic({ apiKey });
-  const authoring = body.mode === "author" && body.program && AUTHOR_PROGRAM[body.program];
   const system = authoring
     ? `${AUTHOR_PERSONA}\n\n${AUTHOR_PROGRAM[body.program!]}`
     : SYSTEM + buildContextNote(body.context);
