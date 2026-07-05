@@ -1,0 +1,15 @@
+# the main quest (themain.quest)
+
+> A single-screen, mobile-first life dashboard that shows you the one move that matters most right now and refuses to let motion masquerade as progress.
+
+Every time you open it, the app surfaces exactly one binding goal from a priority-sorted board, tracks today's day-score across five daily rungs, and runs a Motion Test on each quest: does this leave something in the world, make money, or lock in progress? If not, it is flagged MOTION, earns zero points, and gets parked below the fold. A life-left clock in the header counts your days remaining so time stays legible.
+
+It is built for one person running their own life like a game: days are XP, the board is priority-sorted, and Finn (an in-app AI agent backed by Claude) reads your live board to explain why your problems happen and which to beat first. State lives entirely in browser localStorage, no auth and no backend. Built with Next.js, TypeScript, React, and Tailwind.
+
+## Key links
+- [Home](https://themain.quest/): the full single-screen dashboard: life-left clock, today's rungs, the quest board with one binding goal, and the WHO/WHAT/WHERE lenses.
+- [Finn agent API](https://themain.quest/api/finn): server route that calls Claude so your API key never reaches the browser; powers the in-app chatbot.
+
+## About
+- Part of adam.inc, the internet portfolio of Adam Pangelinan (Anchor Marianas LLC).
+- Builder: https://adampang.com
