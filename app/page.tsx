@@ -9,6 +9,7 @@ import { FinnChat } from "@/components/FinnChat";
 import { Header } from "@/components/Header";
 import { LensCards } from "@/components/LensCards";
 import { MatchPanel } from "@/components/MatchPanel";
+import { PomodoroLine } from "@/components/PomodoroLine";
 import { ProblemsBoard } from "@/components/ProblemsBoard";
 import { QuestBoard } from "@/components/QuestBoard";
 import { Rungs } from "@/components/Rungs";
@@ -453,6 +454,7 @@ export default function Page() {
         lethal={isLethal(match, !!binding)}
         onEnter={() => setBoardOpen(true)}
       />
+      <PomodoroLine quests={quests} />
       <ClimbPanel xp={progress.xp} ready={progressHydrated} streak={streak.current} bestStreak={streak.best} />
       <Rungs rungs={day.rungs} score={score} onToggle={toggleRung} />
       <QuestBoard

@@ -24,10 +24,21 @@ export function sortQuests(quests: Quest[]): Quest[] {
 
 // The income lanes. The app's #1 job is to point Adam at the highest-leverage
 // income close, so the boss recommendation puts these first.
-const INCOME = new Set<Priority>(["Leverage", "Marketplace"]);
+export const INCOME_LANES = new Set<Priority>(["Leverage", "Marketplace"]);
+
+// A one-way door: an irreversible send. Shipping one is what wins the day, and
+// what earns the top XP, so the engine flags them with a 🚪.
+// Kept tight to true irreversible sends. Words like "pitch", "apply", "plan"
+// are omitted: they read as prep, not a door, and cause false positives.
+const ONE_WAY_DOOR_RE =
+  /\b(send|sent|submit|submitted|publish|published|post|posted|pay|paid|wire|wired|transfer|deploy|deployed|ship|shipped|sign|signed|launch|launched|invoice|invoiced|email|reply|replied)\b/i;
+
+export function isOneWayDoor(title: string): boolean {
+  return ONE_WAY_DOOR_RE.test(title);
+}
 
 function bossScore(q: Quest): number {
-  return (INCOME.has(q.priority) ? 0 : 1) * 100 + priorityRank[q.priority];
+  return (INCOME_LANES.has(q.priority) ? 0 : 1) * 100 + priorityRank[q.priority];
 }
 
 // True when `a` is a higher-leverage boss than `b`: income first, then priority.
