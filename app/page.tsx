@@ -475,6 +475,9 @@ export default function Page() {
         <p className="font-pixel text-[7px] uppercase leading-relaxed text-ink/70">
           the main quest · this dashboard is a Loops-tier build. now go strike the boss.
         </p>
+        <p className="mt-2 font-pixel text-[7px] uppercase leading-relaxed text-ink/70">
+          <a href="https://adampang.com" className="underline">built by Adam Pangelinan</a>
+        </p>
       </footer>
       <FinnChat context={finnContext} />
 

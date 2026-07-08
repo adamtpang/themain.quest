@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { Analytics } from "@vercel/analytics/react";
 import { Press_Start_2P, VT323 } from "next/font/google";
 import "./globals.css";
 
@@ -35,7 +36,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${press.variable} ${vt.variable}`}>
-      <body className="font-vt antialiased">{children}</body>
+      <body className="font-vt antialiased">
+        {children}
+        <Analytics />
+      </body>
     </html>
   );
 }
