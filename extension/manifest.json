@@ -1,10 +1,17 @@
 {
   "manifest_version": 3,
   "name": "the main quest",
-  "version": "1.1.0",
-  "description": "Your one life, gamified. The badge counts your years left. Click to glance, then go strike the boss.",
-  "permissions": ["alarms"],
+  "version": "1.2.0",
+  "description": "Your gamified life command center. Years-left badge, live main quest, and a lesson from the greatest lives ever lived, every time you open it.",
+  "permissions": ["alarms", "storage"],
   "background": { "service_worker": "background.js" },
+  "content_scripts": [
+    {
+      "matches": ["https://themain.quest/*"],
+      "js": ["bridge.js"],
+      "run_at": "document_idle"
+    }
+  ],
   "action": {
     "default_popup": "popup.html",
     "default_title": "the main quest",
