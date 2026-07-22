@@ -7,7 +7,7 @@ type Mode = "AGENDA" | "WEEK" | "MONTH";
 
 const SRC_KEY = "tmq.gcal.src";
 const MODE_KEY = "tmq.gcal.mode";
-const DEFAULT_SRC = "adamtpang@gmail.com";
+const DEFAULT_SRC = "adamtpangelinan@gmail.com";
 
 function embedUrl(src: string, mode: Mode, tz: string) {
   const p = new URLSearchParams({
