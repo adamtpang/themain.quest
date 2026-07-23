@@ -8,7 +8,9 @@ import { ClimbPanel } from "@/components/ClimbPanel";
 import { FinnChat } from "@/components/FinnChat";
 import { Header } from "@/components/Header";
 import { LensCards } from "@/components/LensCards";
+import { LuckPanel } from "@/components/LuckPanel";
 import { MatchPanel } from "@/components/MatchPanel";
+import { MentorPanel } from "@/components/MentorPanel";
 import { PomodoroLine } from "@/components/PomodoroLine";
 import { ProblemsBoard } from "@/components/ProblemsBoard";
 import { QuestBoard } from "@/components/QuestBoard";
@@ -455,6 +457,8 @@ export default function Page() {
         onEnter={() => setBoardOpen(true)}
       />
       <PomodoroLine quests={quests} />
+      <LuckPanel />
+      <MentorPanel />
       <ClimbPanel xp={progress.xp} ready={progressHydrated} streak={streak.current} bestStreak={streak.best} />
       <Rungs rungs={day.rungs} score={score} onToggle={toggleRung} />
       <QuestBoard
