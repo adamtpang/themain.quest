@@ -52,53 +52,31 @@ try {
   /* no live state, the glance still works */
 }
 
-// The greatest lives ever lived. One mentor per open, or cycle for more. Each is
-// the transferable principle behind their success, plus a move you can run today.
-const MENTORS = [
-  { name: "John D. Rockefeller", tag: "wealth, oil, compounding", lesson: "Measure everything, reinvest the surplus, and stay calm while the market panics. A fortune is patience plus arithmetic.", move: "log your income move before you touch anything else." },
-  { name: "Marcus Aurelius", tag: "rome, stoicism", lesson: "You do not control events, only your response to them. The obstacle in the way becomes the way.", move: "step one inch into the thing you are avoiding." },
-  { name: "Leonardo da Vinci", tag: "art, science, everything", lesson: "Relentless curiosity across every field compounds into genius. Carry a notebook, question all of it.", move: "write down the question you cannot stop thinking about." },
-  { name: "Benjamin Franklin", tag: "founding, self-making", lesson: "Score your virtues nightly. Steady, tracked improvement beats heroic bursts of willpower.", move: "pick one virtue and grade yourself on it tonight." },
-  { name: "Warren Buffett", tag: "investing, patience", lesson: "Stay inside your circle of competence and say no to almost everything. Then bet big on the rare yes.", move: "kill one commitment that is outside your circle." },
-  { name: "Elon Musk", tag: "engineering, scale", lesson: "Reason from first principles. Delete the requirement before you optimize it, then simplify and accelerate.", move: "delete one task that should not exist." },
-  { name: "Marie Curie", tag: "science, firsts", lesson: "Obsessive focus on work that matters, and the nerve to be first. Comfort is not the goal, the discovery is.", move: "give your hardest task 25 unbroken minutes." },
-  { name: "Nelson Mandela", tag: "freedom, endurance", lesson: "Play the decades-long game. Forgiveness is strategy, not weakness. Character outlasts every circumstance.", move: "choose the patient move over the reactive one." },
-  { name: "Steve Jobs", tag: "products, taste", lesson: "Focus is saying no to a thousand good ideas. Taste and simplicity are the real edge.", move: "cut one feature, one meeting, one yes." },
-  { name: "Miyamoto Musashi", tag: "the sword, mastery", lesson: "Master one path through ceaseless practice. A thousand days to learn it, ten thousand to refine it.", move: "give your craft one deep, deliberate block." },
-  { name: "Charlie Munger", tag: "mental models", lesson: "Invert, always invert. It is often enough just to avoid the standard ways of failing.", move: "ask what would guarantee failure today, then dodge it." },
-  { name: "Viktor Frankl", tag: "meaning, survival", lesson: "When you cannot change the situation, you change yourself. Meaning is the deepest fuel there is.", move: "name who your hard task today is really for." },
-  { name: "Seneca", tag: "stoic, time", lesson: "Time is the one thing you can never earn back. Guard it like your life, because it is your life.", move: "cut one time-leak before noon." },
-  { name: "Bruce Lee", tag: "martial art, self-expression", lesson: "Absorb what is useful, discard what is not, and add what is uniquely your own. Be water.", move: "adapt one method to fit you, and drop the dogma." },
-  { name: "Michelangelo", tag: "sculpture, craft", lesson: "The statue already lives inside the marble. Your only job is to remove everything that is not it.", move: "chip away one thing hiding your main quest." },
-  { name: "Aristotle", tag: "philosophy, excellence", lesson: "Excellence is a habit, not a single act. You become what you repeatedly do.", move: "repeat the keystone habit that makes the rest easy." },
-  { name: "Confucius", tag: "wisdom, cultivation", lesson: "The one who moves a mountain begins by carrying away the small stones. Cultivate yourself daily.", move: "carry away one small stone of the big thing." },
-  { name: "Harriet Tubman", tag: "courage, freedom", lesson: "Once you decide on freedom, you keep going. You do not stop at the first fence, or the tenth.", move: "take the next step even scared, then the next." },
-];
-
+// The greatest lives ever lived, from the shared roster (mentors.js), picked by
+// DATE so the popup, the pinned tab, themain.quest, and the calendar banners
+// all name the same mentor on the same day. Cycle for more.
 function showMentor(i) {
-  const n = ((i % MENTORS.length) + MENTORS.length) % MENTORS.length;
-  const m = MENTORS[n];
+  const n = ((i % TMQ_MENTORS.length) + TMQ_MENTORS.length) % TMQ_MENTORS.length;
+  const m = TMQ_MENTORS[n];
   document.getElementById("mName").textContent = m.name;
   document.getElementById("mTag").textContent = m.tag;
-  document.getElementById("mLesson").textContent = m.lesson;
+  document.getElementById("mLesson").textContent = m.day;
   document.getElementById("mMove").textContent = m.move;
 }
 
-let mi = 0;
-try {
-  mi = (Number(localStorage.getItem("mentor") || "-1") + 1) % MENTORS.length;
-  localStorage.setItem("mentor", String(mi));
-} catch (e) {
-  mi = 0;
-}
+let mi = tmqMentorIndex(new Date());
 showMentor(mi);
 
 document.getElementById("nextMentor").addEventListener("click", () => {
-  mi = (mi + 1) % MENTORS.length;
-  try {
-    localStorage.setItem("mentor", String(mi));
-  } catch (e) {
-    /* ignore */
-  }
+  mi = (mi + 1) % TMQ_MENTORS.length;
   showMentor(mi);
+});
+
+// The lifeleft move: open the full page, then right-click the tab and pin it.
+document.getElementById("openTab").addEventListener("click", () => {
+  try {
+    chrome.tabs.create({ url: chrome.runtime.getURL("tab.html"), pinned: true });
+  } catch (e) {
+    window.open("tab.html");
+  }
 });

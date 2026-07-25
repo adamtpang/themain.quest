@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>the main quest</title>
+<style>
+  :root {
+    --ink: #241b40;
+    --paper: #fff7e6;
+    --paper2: #ffeccb;
+    --gold: #ffcf4a;
+    --red: #ff5d5d;
+    --green: #54c244;
+    --sky: #9bd9ff;
+    --muted: #5f5c52;
+  }
+  html, body { margin: 0; padding: 0; height: 100%; }
+  body {
+    background: var(--sky);
+    color: var(--ink);
+    font-family: ui-monospace, "Courier New", monospace;
+    display: flex; align-items: center; justify-content: center;
+    min-height: 100vh;
+  }
+  .wrap { width: min(560px, 92vw); padding: 24px 0; }
+  .card { background: var(--paper); border: 4px solid var(--ink); box-shadow: 6px 6px 0 0 var(--ink); padding: 20px; margin-bottom: 16px; }
+  h1 { font-size: 15px; margin: 0; text-transform: uppercase; letter-spacing: 1px; }
+  .sub { font-size: 13px; color: var(--muted); margin-top: 3px; }
+  .big { font-size: 56px; font-weight: 800; line-height: 1; color: var(--red); letter-spacing: -1px; }
+  .bar { height: 16px; border: 3px solid var(--ink); background: var(--paper2); margin-top: 12px; overflow: hidden; box-shadow: inset 2px 2px 0 0 rgba(36, 27, 64, 0.25); }
+  .fill { height: 100%; background: linear-gradient(90deg, var(--red), var(--gold), var(--sky)); }
+  .row { display: flex; gap: 8px; margin-top: 14px; }
+  .stat { flex: 1; background: var(--paper2); border: 3px solid var(--ink); padding: 8px 4px; text-align: center; }
+  .stat .n { font-size: 20px; font-weight: 800; line-height: 1; }
+  .stat .l { font-size: 9px; text-transform: uppercase; color: var(--muted); margin-top: 4px; }
+  .quest { margin-top: 12px; font-size: 13px; line-height: 1.35; }
+  .quest b { font-size: 10px; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 2px; }
+  .mentor { background: var(--gold); }
+  .mentor .kicker { font-size: 10px; text-transform: uppercase; opacity: 0.7; }
+  .mentor .name { font-size: 17px; font-weight: 800; text-transform: uppercase; margin-top: 3px; }
+  .mentor .tag { font-size: 10px; text-transform: uppercase; color: var(--muted); margin-top: 2px; }
+  .mentor .day { font-size: 13px; line-height: 1.45; margin-top: 8px; }
+  .mentor .move { font-size: 13px; line-height: 1.4; margin-top: 8px; border-top: 2px dashed rgba(36, 27, 64, 0.3); padding-top: 8px; }
+  .mentor .move b { font-size: 10px; text-transform: uppercase; }
+  .btns { display: flex; gap: 10px; }
+  a.play { flex: 1; display: block; text-align: center; background: var(--red); color: var(--paper); border: 3px solid var(--ink); box-shadow: 4px 4px 0 0 var(--ink); padding: 12px; font-weight: 800; text-transform: uppercase; text-decoration: none; font-size: 13px; }
+  a.cal { flex: 1; display: block; text-align: center; background: var(--paper); color: var(--ink); border: 3px solid var(--ink); box-shadow: 4px 4px 0 0 var(--ink); padding: 12px; font-weight: 800; text-transform: uppercase; text-decoration: none; font-size: 13px; }
+  a.play:active, a.cal:active { transform: translate(3px, 3px); box-shadow: 0 0 0 0 var(--ink); }
+  .hint { text-align: center; font-size: 10px; color: var(--muted); margin-top: 14px; text-transform: uppercase; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>❤️ the main quest</h1>
+      <div class="sub">days are XP. spend today's well.</div>
+      <div style="margin-top: 14px;">
+        <span class="big" id="daysLeft">...</span>
+        <span style="font-size: 14px; font-weight: 800;">days left</span>
+      </div>
+      <div class="bar"><div class="fill" id="fill" style="width: 0%"></div></div>
+      <div class="sub" id="spent">loading the map</div>
+      <div class="row">
+        <div class="stat"><div class="n" id="lvl">-</div><div class="l">level</div></div>
+        <div class="stat"><div class="n" id="streak">-</div><div class="l">streak</div></div>
+        <div class="stat"><div class="n" id="boss">-</div><div class="l">boss hp</div></div>
+      </div>
+      <div class="quest"><b>today's main quest</b><span id="mainQuest">open themain.quest once to sync your quest here</span></div>
+    </div>
+
+    <div class="card mentor">
+      <div class="kicker">🏛 today's mentor</div>
+      <div class="name" id="mName">...</div>
+      <div class="tag" id="mTag"></div>
+      <div class="day" id="mDay"></div>
+      <div class="move"><b>your move today</b> <span id="mMove"></span></div>
+    </div>
+
+    <div class="btns">
+      <a class="play" href="https://themain.quest" target="_blank" rel="noopener">▶ play</a>
+      <a class="cal" href="https://calendar.google.com/calendar/r" target="_blank" rel="noopener">📅 calendar</a>
+    </div>
+    <div class="hint">right-click this tab and choose pin. it survives restarts.</div>
+  </div>
+  <script src="mentors.js"></script>
+  <script src="tab.js"></script>
+</body>
+</html>

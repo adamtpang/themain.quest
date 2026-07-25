@@ -39,6 +39,8 @@
   .cycle { display: block; width: 100%; background: none; border: none; color: var(--ink); font-family: inherit; font-size: 10px; text-transform: uppercase; cursor: pointer; margin-top: 8px; padding: 0; text-align: right; text-decoration: underline; opacity: 0.75; }
   a.play { display: block; text-align: center; background: var(--red); color: var(--paper); border: 3px solid var(--ink); box-shadow: 3px 3px 0 0 var(--ink); padding: 10px; font-weight: 800; text-transform: uppercase; text-decoration: none; font-size: 13px; }
   a.play:active { transform: translate(3px, 3px); box-shadow: 0 0 0 0 var(--ink); }
+  .pintab { display: block; width: 100%; margin-top: 10px; background: var(--paper); color: var(--ink); border: 3px solid var(--ink); box-shadow: 3px 3px 0 0 var(--ink); padding: 8px; font-family: inherit; font-weight: 800; text-transform: uppercase; font-size: 11px; cursor: pointer; }
+  .pintab:active { transform: translate(3px, 3px); box-shadow: 0 0 0 0 var(--ink); }
 </style>
 </head>
 <body>
@@ -71,7 +73,9 @@
     </div>
 
     <a class="play" href="https://themain.quest" target="_blank" rel="noopener">▶ enter the match</a>
+    <button class="pintab" id="openTab">⛶ open as pinnable tab</button>
   </div>
+  <script src="mentors.js"></script>
   <script src="popup.js"></script>
 </body>
 </html>
