@@ -1,8 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { Problem, problemScore, sortProblems } from "@/lib/problems";
+import { FOCUS_PILLAR, Problem, problemScore, sortProblems } from "@/lib/problems";
 import { makeId } from "@/lib/parse";
+import { Pillar, PILLAR_BG, PILLAR_ORDER } from "@/lib/types";
+
+const PILLAR_CYCLE: Array<Pillar | undefined> = [undefined, ...PILLAR_ORDER];
 
 function Pips({ value, max, color }: { value: number; max: number; color: string }) {
   return (
@@ -40,6 +43,15 @@ export function ProblemsBoard({
   function remove(id: string) {
     onChange((prev) => prev.filter((x) => x.id !== id));
   }
+  function cyclePillar(id: string) {
+    onChange((prev) =>
+      prev.map((x) => {
+        if (x.id !== id) return x;
+        const idx = PILLAR_CYCLE.indexOf(x.pillar);
+        return { ...x, pillar: PILLAR_CYCLE[(idx + 1) % PILLAR_CYCLE.length] };
+      })
+    );
+  }
   function add() {
     onChange((prev) => [
       ...prev,
@@ -59,14 +71,23 @@ export function ProblemsBoard({
         </button>
       </div>
       <p className="mb-2 text-sm leading-snug text-ink/70">
-        Ranked by importance and urgency. Tap Finn to plan the order to beat them.
+        Ranked by importance and urgency, weighted toward the speedrun focus.
+        Tap Finn to plan the order to beat them.
+      </p>
+      <p className="mb-2 flex items-center gap-1.5">
+        <span className={`tag inline-flex items-center ${PILLAR_BG[FOCUS_PILLAR]} px-1.5 py-px text-sm uppercase leading-none text-ink`}>
+          🎯 focus: {FOCUS_PILLAR}
+        </span>
+        <span className="text-sm text-ink/60">problems tagged {FOCUS_PILLAR} outrank equal-score rivals</span>
       </p>
 
       <div className="space-y-2">
         {sorted.map((p, i) => (
           <div
             key={p.id}
-            className={`panel p-2 ${p.beaten ? "bg-health/30" : i === 0 ? "bg-life/15" : "bg-paper"}`}
+            className={`panel p-2 ${p.beaten ? "bg-health/30" : i === 0 ? "bg-life/15" : "bg-paper"} ${
+              !p.beaten && p.pillar === FOCUS_PILLAR ? "ring-2 ring-gold" : ""
+            }`}
           >
             <div className="flex items-start gap-2">
               <button
@@ -122,6 +143,23 @@ export function ProblemsBoard({
                   </span>
                 )}
               </div>
+              {edit ? (
+                <button
+                  onClick={() => cyclePillar(p.id)}
+                  aria-label="change pillar"
+                  className={`tag inline-flex items-center px-1.5 py-px text-sm uppercase leading-none ${
+                    p.pillar ? `${PILLAR_BG[p.pillar]} text-ink` : "bg-paper2 text-ink/50"
+                  }`}
+                >
+                  {p.pillar ?? "no pillar"}
+                </button>
+              ) : (
+                p.pillar && (
+                  <span className={`tag inline-flex items-center ${PILLAR_BG[p.pillar]} px-1.5 py-px text-sm uppercase leading-none text-ink`}>
+                    {p.pillar}
+                  </span>
+                )
+              )}
               {!edit && (
                 <span className="ml-auto font-pixel text-[8px] text-ink/50">{problemScore(p)}pts</span>
               )}
