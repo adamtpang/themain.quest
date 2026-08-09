@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AffirmationBanner } from "@/components/AffirmationBanner";
 import { BindingGoal } from "@/components/BindingGoal";
+import { Collapsible } from "@/components/Collapsible";
 import { FirstRunBanner } from "@/components/FirstRunBanner";
 import { ClimbPanel } from "@/components/ClimbPanel";
 import { UnlocksPanel } from "@/components/UnlocksPanel";
@@ -518,17 +519,6 @@ export default function Page() {
             onEnter={() => setBoardOpen(true)}
           />
           <PomodoroLine quests={quests} />
-          <LuckPanel />
-          <MentorPanel />
-          <ClimbPanel
-            pillars={progress}
-            ready={progressHydrated}
-            streak={streak.current}
-            bestStreak={streak.best}
-            ladder={ladder}
-            season={season}
-          />
-          <UnlocksPanel pillars={progress} />
         </>
       )}
       <Rungs rungs={day.rungs} score={score} onToggle={toggleRung} />
@@ -544,9 +534,32 @@ export default function Page() {
       <ProblemsBoard problems={problems} onChange={setProblems} />
       {hasQuests && (
         <>
-          <SelfAuthoring />
-          <LensCards />
-          <SchoolsPanel schools={schools} />
+          <Collapsible
+            storageKey="tmq.section.progress.open"
+            title="🏆 progress"
+            subtitle="rank, pillars, unlocks, schools, luck — how you're doing over time"
+          >
+            <ClimbPanel
+              pillars={progress}
+              ready={progressHydrated}
+              streak={streak.current}
+              bestStreak={streak.best}
+              ladder={ladder}
+              season={season}
+            />
+            <UnlocksPanel pillars={progress} />
+            <SchoolsPanel schools={schools} />
+            <LuckPanel />
+          </Collapsible>
+          <Collapsible
+            storageKey="tmq.section.more.open"
+            title="🧭 more"
+            subtitle="mentor, self authoring, the three portals"
+          >
+            <MentorPanel />
+            <SelfAuthoring />
+            <LensCards />
+          </Collapsible>
         </>
       )}
       <footer className="mx-auto max-w-md px-3 pt-6 text-center">
