@@ -554,7 +554,7 @@ export default function Page() {
           <Collapsible
             storageKey="tmq.section.more.open"
             title="🧭 more"
-            subtitle="mentor, self authoring, the three portals"
+            subtitle="mentor, self authoring, companion apps"
           >
             <MentorPanel />
             <SelfAuthoring />

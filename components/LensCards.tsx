@@ -44,7 +44,10 @@ const LENSES: Lens[] = [
 export function LensCards() {
   return (
     <section className="mx-auto max-w-md px-3 pt-4">
-      <h2 className="mb-2 font-pixel text-[10px] uppercase text-ink">🌀 the three portals</h2>
+      <h2 className="font-pixel text-[10px] uppercase text-ink">🌀 companion apps</h2>
+      <p className="mb-2 text-sm text-ink/60">
+        Separate sites, not part of this dashboard — each opens in a new tab.
+      </p>
       <div className="grid grid-cols-3 gap-2">
         {LENSES.map((l) => (
           <a
@@ -58,7 +61,7 @@ export function LensCards() {
             <span className="mt-1 font-pixel text-[9px] uppercase text-ink">{l.label}</span>
             <span className="text-sm uppercase leading-none text-ink/70">{l.sub}</span>
             <span className="mt-1 text-sm leading-tight text-ink/80">{l.summary}</span>
-            <span className="mt-1 font-pixel text-[6px] uppercase text-ink">enter →</span>
+            <span className="mt-1 font-pixel text-[6px] uppercase text-ink">open ↗</span>
           </a>
         ))}
       </div>
