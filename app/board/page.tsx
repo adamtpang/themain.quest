@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AffirmationBanner } from "@/components/AffirmationBanner";
 import { BindingGoal } from "@/components/BindingGoal";
-import { CalendarPanel } from "@/components/CalendarPanel";
 import { ClimbPanel } from "@/components/ClimbPanel";
 import { UnlocksPanel } from "@/components/UnlocksPanel";
 import { FinnChat } from "@/components/FinnChat";
@@ -533,7 +532,6 @@ export default function Page() {
       />
       <ProblemsBoard problems={problems} onChange={setProblems} />
       <SelfAuthoring />
-      <CalendarPanel />
       <LensCards />
       <SchoolsPanel schools={schools} />
       <footer className="mx-auto max-w-md px-3 pt-6 text-center">

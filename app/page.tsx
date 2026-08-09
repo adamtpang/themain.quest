@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useEffect, useMemo } from "react";
-import { CalendarPanel } from "@/components/CalendarPanel";
 import { computeLifeLeft } from "@/lib/life";
 import { mentorFor } from "@/lib/mentors";
 import { freshPillarProgress, overallLevelFromPillars, PillarProgress, rankForLevel } from "@/lib/progress";
@@ -138,9 +137,6 @@ export default function Home() {
           </div>
         )}
       </section>
-
-      {/* the real calendar. this IS the to-do list. */}
-      <CalendarPanel />
 
       {/* today's mentor, one line of the greatest lives */}
       <section className="mx-auto max-w-md px-3 pt-3">
