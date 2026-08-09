@@ -15,6 +15,8 @@ export const AETHER_SESSIONS: Record<string, AetherSession> = {
   "sprite.email": { key: "sprite.email", label: "📧 Sprite", folder: "sprite.email" },
   "moneymeta.fun": { key: "moneymeta.fun", label: "💰 Moneymeta", folder: "moneymeta.fun" },
   "adam.gives": { key: "adam.gives", label: "🎁 Adam.gives", folder: "adam.gives" },
+  "pangaea.blog": { key: "pangaea.blog", label: "📝 Pangaea", folder: "pangaea.blog" },
+  "strummer.fun": { key: "strummer.fun", label: "🎸 Strummer", folder: "strummer.fun" },
 };
 
 const ROUTE_PATTERNS: Array<{ re: RegExp; session: string }> = [
@@ -30,6 +32,8 @@ const ROUTE_PATTERNS: Array<{ re: RegExp; session: string }> = [
     session: "moneymeta.fun",
   },
   { re: /\b(adam\.?gives|talk-?to menu)\b/i, session: "adam.gives" },
+  { re: /\b(pangaea|blog post|publish the (essay|post))\b/i, session: "pangaea.blog" },
+  { re: /\b(strummer|songwriting|record (a |the )?song|new song)\b/i, session: "strummer.fun" },
 ];
 
 export function detectRoute(text: string): string | undefined {
