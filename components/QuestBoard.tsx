@@ -1,11 +1,37 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Quest } from "@/lib/types";
+import { PILLAR_BG, Quest } from "@/lib/types";
 import { parseOutbox } from "@/lib/parse";
 import { sortQuests } from "@/lib/board";
+import { SYNERGY_BONUS_RATE } from "@/lib/party";
+import { AETHER_SESSIONS, launchCommand } from "@/lib/route";
 import { Algorithm } from "./Algorithm";
 import { MotionTag, PriorityTag } from "./PriorityTag";
+
+function RouteTag({ sessionKey }: { sessionKey: string }) {
+  const [copied, setCopied] = useState(false);
+  const session = AETHER_SESSIONS[sessionKey];
+  if (!session) return null;
+  return (
+    <button
+      onClick={async () => {
+        try {
+          await navigator.clipboard.writeText(launchCommand(session));
+          setCopied(true);
+          setTimeout(() => setCopied(false), 1200);
+        } catch {
+          /* clipboard unavailable, badge still communicates the route */
+        }
+      }}
+      aria-label={`route to ${session.key}`}
+      title={launchCommand(session)}
+      className="tag inline-flex items-center bg-visa px-1.5 py-px text-sm uppercase leading-none text-paper"
+    >
+      {copied ? "copied cmd ✓" : `↪ ${session.label}`}
+    </button>
+  );
+}
 
 function QuestRow({
   q,
@@ -62,6 +88,19 @@ function QuestRow({
           )}
         </button>
 
+        {q.pillar && (
+          <span
+            className={`tag inline-flex items-center ${PILLAR_BG[q.pillar]} px-1.5 py-px text-sm uppercase leading-none text-ink`}
+          >
+            {q.pillar}
+          </span>
+        )}
+        {q.party && (
+          <span className="tag inline-flex items-center bg-bubblegum px-1.5 py-px text-sm uppercase leading-none text-ink">
+            🤝 {q.party} · +{Math.round(SYNERGY_BONUS_RATE * 100)}% xp
+          </span>
+        )}
+        {q.route && <RouteTag sessionKey={q.route} />}
         {q.scheduledTime && (
           <span className="tag inline-flex items-center bg-taxes px-1.5 py-px text-sm uppercase leading-none text-ink">
             ⏰ {q.scheduledTime}

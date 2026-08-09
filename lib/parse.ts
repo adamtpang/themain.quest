@@ -1,4 +1,5 @@
-import { Priority, Quest, RungN } from "./types";
+import { detectRoute } from "./route";
+import { deriveDefaultPillar, Priority, Quest, RungN } from "./types";
 
 export function makeId(): string {
   try {
@@ -44,6 +45,23 @@ const PRIORITY_PATTERNS: Array<{ p: Priority; re: RegExp }> = [
   { p: "Marketplace", re: /\b(marketplace|listing|list|launch|product|ship|sale|sales|store|onboard|customer|user|signup|sign-?up|waitlist|landing)\b/i },
   { p: "Loops", re: /\b(tool|system|meta|dashboard|rename|domain|vault|refactor|setup|automation|inbox|sweep|email)\b/i },
 ];
+
+// Named people first (highest confidence), then generic relationship words.
+// Reuses the same real names that have come up throughout this build rather
+// than inventing a separate roster system.
+const PARTY_PATTERNS: Array<{ re: RegExp; name: string }> = [
+  { re: /\bmaanasa\b/i, name: "Maanasa" },
+  { re: /\badina\b/i, name: "Adina" },
+  { re: /\b(mom|mum)\b/i, name: "Mom" },
+  { re: /\bdad\b/i, name: "Dad" },
+  { re: /\bfamily\b/i, name: "Family" },
+  { re: /\bfriends?\b/i, name: "A friend" },
+];
+
+export function detectParty(text: string): string | undefined {
+  for (const { re, name } of PARTY_PATTERNS) if (re.test(text)) return name;
+  return undefined;
+}
 
 // Rung tags from the processed format: emoji immediately followed by its number.
 const RUNG_TAGS: Array<{ re: RegExp; n: RungN }> = [
@@ -136,10 +154,16 @@ export function parseOutbox(raw: string): Quest[] {
       if (title.length < 3 || EXPLAINER_RE.test(title)) continue;
 
       const isMotion = detectMotion(seg);
+      const priority = suggestPriority(seg, isMotion);
+      const party = detectParty(seg);
+      const route = detectRoute(seg);
       const quest: Quest = {
         id: makeId(),
         title,
-        priority: suggestPriority(seg, isMotion),
+        priority,
+        pillar: deriveDefaultPillar(priority),
+        ...(party ? { party } : {}),
+        ...(route ? { route } : {}),
         passesMotionTest: !isMotion,
         done: false,
         isBinding: false,

@@ -5,7 +5,7 @@ import { useEffect, useMemo } from "react";
 import { CalendarPanel } from "@/components/CalendarPanel";
 import { computeLifeLeft } from "@/lib/life";
 import { mentorFor } from "@/lib/mentors";
-import { levelInfo, Progress, rankForLevel } from "@/lib/progress";
+import { freshPillarProgress, overallLevelFromPillars, PillarProgress, rankForLevel } from "@/lib/progress";
 import { freshStreak, recordWin, refreshStreak, Streak } from "@/lib/streak";
 import { todayStr, useLocalStorage } from "@/lib/storage";
 
@@ -36,7 +36,10 @@ function yesterdayStr(): string {
 
 export default function Home() {
   const [day, setDay, dayHydrated] = useLocalStorage<SendDay>(SEND_KEY, freshSend());
-  const [progress, setProgress, progressHydrated] = useLocalStorage<Progress>(PROGRESS_KEY, { xp: 0 });
+  const [progress, setProgress, progressHydrated] = useLocalStorage<PillarProgress>(
+    PROGRESS_KEY,
+    freshPillarProgress()
+  );
   const [streak, setStreak, streakHydrated] = useLocalStorage<Streak>(STREAK_KEY, freshStreak());
 
   // A new date means a new match. Yesterday's send does not carry.
@@ -54,19 +57,23 @@ export default function Home() {
 
   const life = useMemo(() => computeLifeLeft(), []);
   const mentor = useMemo(() => mentorFor(new Date()), []);
-  const info = levelInfo(progress.xp);
-  const rank = rankForLevel(info.level).current.name;
+  const overallLvl = overallLevelFromPillars(progress);
+  const rank = rankForLevel(overallLvl).current.name;
 
+  // The one-send mechanic is a deal-closing ask by its own copy ("the ask
+  // that wins today"), so it always feeds Wealth directly — it has no Quest
+  // object, so there is no .pillar tag to route by. Health and Wisdom XP
+  // come from closing quests on /board instead.
   function markSent() {
     if (!day.text.trim() || day.sent) return;
     setDay((d) => ({ ...d, sent: true, asks: d.asks + 1 }));
-    setProgress((p) => ({ ...p, xp: p.xp + XP_SEND }));
+    setProgress((p) => ({ ...p, Wealth: p.Wealth + XP_SEND }));
     setStreak((s) => recordWin(s, todayStr(), yesterdayStr()));
   }
 
   function logAsk() {
     setDay((d) => ({ ...d, asks: d.asks + 1 }));
-    setProgress((p) => ({ ...p, xp: p.xp + XP_ASK }));
+    setProgress((p) => ({ ...p, Wealth: p.Wealth + XP_ASK }));
   }
 
   return (
@@ -77,7 +84,7 @@ export default function Home() {
           <div className="flex items-baseline justify-between">
             <h1 className="font-pixel text-[10px] uppercase text-paper">❤️ the main quest</h1>
             <span className="font-pixel text-[8px] uppercase text-gold">
-              lvl {progressHydrated ? info.level : "-"} · {progressHydrated ? rank : "..."}
+              lvl {progressHydrated ? overallLvl : "-"} · {progressHydrated ? rank : "..."}
               {streak.current > 0 ? ` · 🔥${streak.current}` : ""}
             </span>
           </div>

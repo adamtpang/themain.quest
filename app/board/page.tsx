@@ -5,6 +5,7 @@ import { AffirmationBanner } from "@/components/AffirmationBanner";
 import { BindingGoal } from "@/components/BindingGoal";
 import { CalendarPanel } from "@/components/CalendarPanel";
 import { ClimbPanel } from "@/components/ClimbPanel";
+import { UnlocksPanel } from "@/components/UnlocksPanel";
 import { FinnChat } from "@/components/FinnChat";
 import { Header } from "@/components/Header";
 import { LensCards } from "@/components/LensCards";
@@ -35,7 +36,19 @@ import {
   SHIP_XP,
 } from "@/lib/match";
 import { defaultProblems, Problem } from "@/lib/problems";
-import { levelInfo, Progress, rankForLevel, XP_BOSS_BONUS, XP_PER_QUEST } from "@/lib/progress";
+import {
+  freshPillarProgress,
+  levelForXp,
+  overallLevelFromPillars,
+  PillarProgress,
+  rankForLevel,
+  XP_BOSS_BONUS,
+  XP_PER_QUEST,
+} from "@/lib/progress";
+import { freshLadder, LadderRecord, recordResult } from "@/lib/ladder";
+import { synergyBonus } from "@/lib/party";
+import { bonusCrystals } from "@/lib/unlocks";
+import { freshSeasonState, recordSeasonResult, SeasonState } from "@/lib/season";
 import { computeScore } from "@/lib/score";
 import { freshStreak, recordWin, refreshStreak, Streak } from "@/lib/streak";
 import { todayStr, useLocalStorage } from "@/lib/storage";
@@ -53,6 +66,8 @@ const DAY_KEY = "tmq.day";
 const SCHOOLS_KEY = "tmq.schools";
 const PROBLEMS_KEY = "tmq.problems";
 const PROGRESS_KEY = "tmq.progress";
+const LADDER_KEY = "tmq.ladder";
+const SEASON_KEY = "tmq.season";
 const MATCH_KEY = "tmq.match";
 const STREAK_KEY = "tmq.streak";
 
@@ -69,18 +84,32 @@ export default function Page() {
   const [day, setDay, dayHydrated] = useLocalStorage<DayState>(DAY_KEY, freshDay());
   const [schools, setSchools] = useLocalStorage<Schools>(SCHOOLS_KEY, freshSchools());
   const [problems, setProblems] = useLocalStorage<Problem[]>(PROBLEMS_KEY, defaultProblems());
-  const [progress, setProgress, progressHydrated] = useLocalStorage<Progress>(PROGRESS_KEY, { xp: 0 });
-  const [match, setMatch, matchHydrated] = useLocalStorage<MatchState>(MATCH_KEY, freshMatch(todayStr()));
+  const [progress, setProgress, progressHydrated] = useLocalStorage<PillarProgress>(
+    PROGRESS_KEY,
+    freshPillarProgress()
+  );
+  const [match, setMatch, matchHydrated] = useLocalStorage<MatchState>(
+    MATCH_KEY,
+    freshMatch(todayStr(), DEFAULT_CRYSTALS + bonusCrystals(levelForXp(progress.Health)))
+  );
   const [streak, setStreak, streakHydrated] = useLocalStorage<Streak>(STREAK_KEY, freshStreak());
+  const [ladder, setLadder] = useLocalStorage<LadderRecord>(LADDER_KEY, freshLadder());
+  const [season, setSeason] = useLocalStorage<SeasonState>(SEASON_KEY, freshSeasonState(todayStr()));
   // The app opens INTO the match, Hearthstone-style. The x leads back to camp.
   const [boardOpen, setBoardOpen] = useState(true);
   const resolveGuard = useRef(false);
 
-  // Every day boots at 5/10: reset rungs when the date rolls over.
+  // Every day boots at 5/10: reset rungs when the date rolls over. The
+  // instant before that reset is the only moment a day's final score is
+  // known, so that is where the ladder judges it — W if it hit the winning
+  // score (3+ rungs), L otherwise. A day judges itself exactly once.
   useEffect(() => {
     if (!dayHydrated) return;
     const today = todayStr();
     if (day.date !== today) {
+      const finalScore = computeScore(day);
+      setLadder((l) => recordResult(l, day.date, finalScore.isWinning));
+      setSeason((s) => recordSeasonResult(s, day.date, finalScore.isWinning));
       setDay({ date: today, rungs: freshRungs() });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -115,11 +144,14 @@ export default function Page() {
   }, [matchHydrated]);
 
   // The match resets daily, and the boss HP tracks whichever goal is crowned.
+  // Waits on progressHydrated too: bonusCrystals(levelForXp(progress.Health)) must read
+  // the real hydrated value, not the pre-hydration default, or the day's
+  // crystal count locks in wrong for the rest of the day.
   useEffect(() => {
-    if (!matchHydrated) return;
+    if (!matchHydrated || !progressHydrated) return;
     const today = todayStr();
     if (match.date !== today) {
-      setMatch(freshMatch(today));
+      setMatch(freshMatch(today, DEFAULT_CRYSTALS + bonusCrystals(levelForXp(progress.Health))));
       return;
     }
     if (binding && match.bossId !== binding.id) {
@@ -157,7 +189,7 @@ export default function Page() {
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [matchHydrated, match.date, binding?.id, match.focusEndsAt, match.awaitingResolve]);
+  }, [matchHydrated, progressHydrated, match.date, binding?.id, match.focusEndsAt, match.awaitingResolve]);
 
   // The rope: when the turn timer runs out (even if we were away), the turn ends
   // and waits for the check-in. Damage lands on the resolve tap, never silently.
@@ -190,15 +222,17 @@ export default function Page() {
   // Midnight is real even in a tab left open: a slow tick rolls the day over,
   // so a session crossing 12am gets its fresh rungs and fresh match.
   useEffect(() => {
-    if (!dayHydrated || !matchHydrated) return;
+    if (!dayHydrated || !matchHydrated || !progressHydrated) return;
     const id = setInterval(() => {
       const today = todayStr();
       setDay((d) => (d.date !== today ? { date: today, rungs: freshRungs() } : d));
-      setMatch((m) => (m.date !== today ? freshMatch(today) : m));
+      setMatch((m) =>
+        m.date !== today ? freshMatch(today, DEFAULT_CRYSTALS + bonusCrystals(levelForXp(progress.Health))) : m
+      );
     }, 30000);
     return () => clearInterval(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dayHydrated, matchHydrated]);
+  }, [dayHydrated, matchHydrated, progressHydrated]);
 
   // Lethal landed: the boss HP hit zero, so strike it dead (pays the climb XP + rung 7).
   useEffect(() => {
@@ -228,11 +262,17 @@ export default function Page() {
   // Compact live state Finn reasons about.
   const finnContext = useMemo(
     () => ({
-      rank: rankForLevel(levelInfo(progress.xp).level).current.name,
-      level: levelInfo(progress.xp).level,
-      lifetimeXp: progress.xp,
+      rank: rankForLevel(overallLevelFromPillars(progress)).current.name,
+      level: overallLevelFromPillars(progress),
+      lifetimeXp: progress.Health + progress.Wealth + progress.Wisdom,
       streak: streak.current,
       bestStreak: streak.best,
+      ladder: { wins: ladder.wins, losses: ladder.losses },
+      season: {
+        number: season.current.number,
+        wins: season.current.wins,
+        losses: season.current.losses,
+      },
       match: {
         phase: matchPhase(match, !!binding, Date.now()),
         crystalsLeft: crystalsLeft(match),
@@ -261,7 +301,7 @@ export default function Page() {
       })),
       schools: SCHOOL_IDS.map((id) => ({ name: SCHOOL_META[id].name, level: schoolLevel(schools[id]) })),
     }),
-    [score, binding, recommended, day, quests, problems, schools, progress, match, streak]
+    [score, binding, recommended, day, quests, problems, schools, progress, match, streak, ladder, season]
   );
 
   // ----- quest handlers -----
@@ -282,7 +322,10 @@ export default function Page() {
     const completingBinding = done && wasBinding;
     // A real close pays lifetime XP exactly once. Motion pays nothing. The boss pays a bonus.
     const award = done && q.passesMotionTest && !q.xpAwarded;
-    const xpGain = award ? XP_PER_QUEST + (wasBinding ? XP_BOSS_BONUS : 0) : 0;
+    const baseGain = award ? XP_PER_QUEST + (wasBinding ? XP_BOSS_BONUS : 0) : 0;
+    // Party synergy: a real close done WITH a named person earns bonus XP on
+    // top, Overwatch-style team comp over solo play (lib/party.ts).
+    const xpGain = baseGain > 0 && q.party ? baseGain + synergyBonus(baseGain) : baseGain;
     setQuests((prev) =>
       prev.map((x) =>
         x.id === id
@@ -298,7 +341,13 @@ export default function Page() {
     // Closing the crowned goal hits the keystone rung (Goal hit).
     if (completingBinding) setRung(KEYSTONE_RUNG, true);
     if (xpGain > 0) {
-      setProgress((p) => ({ ...p, xp: p.xp + xpGain }));
+      // Life/Visa/Loops priorities carry no pillar (untracked infra, per
+      // LIFE_GAME.md) — their closes still level a school below, but they do
+      // not feed the Health/Wealth/Wisdom gate.
+      if (q.pillar) {
+        const pillar = q.pillar;
+        setProgress((p) => ({ ...p, [pillar]: p[pillar] + xpGain }));
+      }
       const sid = SCHOOL_OF[q.priority]; // the same close levels its school
       setSchools((s) => ({ ...s, [sid]: s[sid] + xpGain }));
     }
@@ -399,7 +448,11 @@ export default function Page() {
         breakEndsAt: bossAlive && manaLeft ? Date.now() + BREAK_MINUTES * 60000 : null,
       };
     });
-    if (shipped) setProgress((p) => ({ ...p, xp: p.xp + SHIP_XP }));
+    if (shipped && binding?.pillar) {
+      const pillar = binding.pillar;
+      const shipGain = binding.party ? SHIP_XP + synergyBonus(SHIP_XP) : SHIP_XP;
+      setProgress((p) => ({ ...p, [pillar]: p[pillar] + shipGain }));
+    }
   }
 
   function startFocus(goal: string) {
@@ -459,7 +512,15 @@ export default function Page() {
       <PomodoroLine quests={quests} />
       <LuckPanel />
       <MentorPanel />
-      <ClimbPanel xp={progress.xp} ready={progressHydrated} streak={streak.current} bestStreak={streak.best} />
+      <ClimbPanel
+        pillars={progress}
+        ready={progressHydrated}
+        streak={streak.current}
+        bestStreak={streak.best}
+        ladder={ladder}
+        season={season}
+      />
+      <UnlocksPanel pillars={progress} />
       <Rungs rungs={day.rungs} score={score} onToggle={toggleRung} />
       <QuestBoard
         quests={quests}

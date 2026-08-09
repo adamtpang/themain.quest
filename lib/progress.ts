@@ -1,6 +1,8 @@
 // The Climb: lifetime XP that never resets. Only real closes move it.
 // This is the "visible becoming" layer. Motion earns nothing.
 
+import { Pillar, PILLAR_ORDER } from "./types";
+
 export const XP_PER_QUEST = 25; // a real close (passes the Motion Test)
 export const XP_BOSS_BONUS = 75; // closing the binding goal: 100 total
 
@@ -33,6 +35,38 @@ export function levelInfo(xp: number): LevelInfo {
   const neededForNext = next - base;
   const pct = neededForNext > 0 ? Math.min(100, (intoLevel / neededForNext) * 100) : 0;
   return { level, intoLevel, neededForNext, pct };
+}
+
+// Three independent XP pools, one per pillar (LIFE_GAME.md, decided
+// 2026-08-07). Same xpForLevel/levelForXp curve as the single-pool Progress
+// above — no reason for three different curves — but tracked separately so
+// none of them can be starved by a big week in the others.
+export type PillarProgress = Record<Pillar, number>;
+
+export function freshPillarProgress(): PillarProgress {
+  return { Health: 0, Wealth: 0, Wisdom: 0 };
+}
+
+export function levelInfoByPillar(
+  pillars: PillarProgress
+): Record<Pillar, LevelInfo> {
+  const out = {} as Record<Pillar, LevelInfo>;
+  for (const p of PILLAR_ORDER) out[p] = levelInfo(pillars[p]);
+  return out;
+}
+
+// THE actual fix, not just three visible numbers: overall level is the
+// LOWEST of the three pillar levels, never the average and never the sum.
+// You cannot level up by only feeding your favorite pillar.
+export function overallLevelFromPillars(pillars: PillarProgress): number {
+  return Math.min(...PILLAR_ORDER.map((p) => levelForXp(pillars[p])));
+}
+
+// Which pillar is currently gating overall level — the one to feed next.
+export function weakestPillar(pillars: PillarProgress): Pillar {
+  return PILLAR_ORDER.reduce((weakest, p) =>
+    levelForXp(pillars[p]) < levelForXp(pillars[weakest]) ? p : weakest
+  );
 }
 
 export type Rank = { name: string; minLevel: number };

@@ -7,12 +7,60 @@ export type Priority =
   | "Marketplace"
   | "Loops";
 
+// The three XP tracks (LIFE_GAME.md, decided 2026-08-07). Overall level is the
+// LOWEST of the three, not the average or the sum — a pillar cannot be
+// starved by a big week in the others. Not every quest has to carry one: Life,
+// Visa, and Loops priorities stay untracked infrastructure, same as before.
+export type Pillar = "Health" | "Wealth" | "Wisdom";
+
+export const PILLAR_ORDER: Pillar[] = ["Health", "Wealth", "Wisdom"];
+
+// Full, literal Tailwind classes — never build these with template
+// interpolation (`` `bg-${x}` ``). Tailwind's compiler scans source for
+// literal strings; bg-sky/text-sky in particular appear nowhere else as a
+// literal, so a dynamic build would silently generate no CSS for Wisdom.
+// Real tokens only, from tailwind.config.ts: "wealth"/"wisdom" classes do not
+// exist in the theme. Health reuses its own priority color; Wealth borrows
+// gold (already the Climb panel's money color); Wisdom borrows sky.
+export const PILLAR_BG: Record<Pillar, string> = {
+  Health: "bg-health",
+  Wealth: "bg-gold",
+  Wisdom: "bg-sky",
+};
+export const PILLAR_TEXT: Record<Pillar, string> = {
+  Health: "text-health",
+  Wealth: "text-gold",
+  Wisdom: "text-sky",
+};
+
+// Deterministic priority -> pillar mapping, per LIFE_GAME.md. Only 3 of 7
+// priorities map automatically; Life, Visa, and Loops are intentionally
+// absent (they don't fit a single pillar), and nothing currently auto-derives
+// Wisdom — it is earned only through its own XP table until a quest is
+// explicitly tagged.
+export const PRIORITY_TO_PILLAR: Partial<Record<Priority, Pillar>> = {
+  Health: "Health",
+  Leverage: "Wealth",
+  Marketplace: "Wealth",
+  Taxes: "Wealth",
+};
+
+// The cheap auto-tag path: derive a default pillar from priority alone. Falls
+// through to undefined for Life/Visa/Loops and for anything meant to earn
+// Wisdom, which always needs an explicit tag (see PRIORITY_TO_PILLAR above).
+export function deriveDefaultPillar(priority: Priority): Pillar | undefined {
+  return PRIORITY_TO_PILLAR[priority];
+}
+
 export type RungN = 6 | 7 | 8 | 9 | 10;
 
 export type Quest = {
   id: string;
   title: string;
   priority: Priority;
+  pillar?: Pillar; // which XP track this feeds; undefined = untracked infra
+  party?: string; // real person this quest is done WITH; earns synergy XP (lib/party.ts)
+  route?: string; // which Aether Claude Code session actually handles this (lib/route.ts); undefined = this session
   passesMotionTest: boolean; // false => grey "MOTION" tag, 0 points, parked
   done: boolean;
   isBinding: boolean; // only ONE quest can be true; must pass Motion Test

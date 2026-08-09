@@ -26,10 +26,10 @@ export type MatchState = {
   lastRating: FlowRating | null; // tunes the next turn's coaching line
 };
 
-export function freshMatch(date: string): MatchState {
+export function freshMatch(date: string, crystals: number = DEFAULT_CRYSTALS): MatchState {
   return {
     date,
-    crystals: DEFAULT_CRYSTALS,
+    crystals,
     spent: 0,
     bossId: null,
     bossHpMax: DEFAULT_BOSS_HP,
