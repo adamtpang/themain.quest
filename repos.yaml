@@ -1,0 +1,11 @@
+# repos.yaml v0 — see github.com/adamtpang/repo-connect
+repo: themain.quest
+is: A single-screen, mobile-first life dashboard that shows the one move that matters most right now, refusing to let motion masquerade as progress.
+url: https://themain.quest
+cluster: money-os
+
+kin:
+  - repo: moneymeta.fun
+    why: moneymeta is the income side of Adam's money OS; themain.quest is where the day-to-day moves that grow it (posting a draft, making a call) actually get tracked and executed.
+  - repo: deathmoney.fyi
+    why: deathmoney is the expense/debt side of the same money OS; themain.quest is where its real action items (the ASAP checklist tasks) live as daily quests instead of a static file nobody reopens.
