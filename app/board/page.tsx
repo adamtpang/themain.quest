@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AffirmationBanner } from "@/components/AffirmationBanner";
 import { BindingGoal } from "@/components/BindingGoal";
+import { FirstRunBanner } from "@/components/FirstRunBanner";
 import { ClimbPanel } from "@/components/ClimbPanel";
 import { UnlocksPanel } from "@/components/UnlocksPanel";
 import { FinnChat } from "@/components/FinnChat";
@@ -95,7 +96,7 @@ export default function Page() {
   const [ladder, setLadder] = useLocalStorage<LadderRecord>(LADDER_KEY, freshLadder());
   const [season, setSeason] = useLocalStorage<SeasonState>(SEASON_KEY, freshSeasonState(todayStr()));
   // The app opens INTO the match, Hearthstone-style. The x leads back to camp.
-  const [boardOpen, setBoardOpen] = useState(true);
+  const [boardOpen, setBoardOpen] = useState(false);
   const resolveGuard = useRef(false);
 
   // Every day boots at 5/10: reset rungs when the date rolls over. The
@@ -117,6 +118,11 @@ export default function Page() {
   const score = useMemo(() => computeScore(day), [day]);
   const binding = useMemo(() => bindingGoal(quests), [quests]);
   const recommended = useMemo(() => recommendedBinding(quests), [quests]);
+  // Everything below is an OUTCOME of playing, not an entry point. Until
+  // there's at least one quest, showing all of it at once is exactly the
+  // "I don't get how to use this" complaint — so it stays hidden behind the
+  // one clear first action (FirstRunBanner -> load the outbox).
+  const hasQuests = quests.length > 0;
 
   // One-time shape upgrade: older saves lack the pomodoro fields and carry the
   // 50-minute economy. One old block = two pomodoro pips, clamped so a half-dead
@@ -494,6 +500,7 @@ export default function Page() {
     <main className="min-h-screen pb-24">
       <Header score={score} lethal={isLethal(match, !!binding)} />
       <AffirmationBanner />
+      {!hasQuests && <FirstRunBanner />}
       <BindingGoal
         binding={binding}
         recommended={recommended}
@@ -501,25 +508,29 @@ export default function Page() {
         onPromote={setBinding}
         onClear={clearBinding}
       />
-      <MatchPanel
-        hasBoss={!!binding}
-        bossTitle={binding?.title}
-        match={match}
-        lethal={isLethal(match, !!binding)}
-        onEnter={() => setBoardOpen(true)}
-      />
-      <PomodoroLine quests={quests} />
-      <LuckPanel />
-      <MentorPanel />
-      <ClimbPanel
-        pillars={progress}
-        ready={progressHydrated}
-        streak={streak.current}
-        bestStreak={streak.best}
-        ladder={ladder}
-        season={season}
-      />
-      <UnlocksPanel pillars={progress} />
+      {hasQuests && (
+        <>
+          <MatchPanel
+            hasBoss={!!binding}
+            bossTitle={binding?.title}
+            match={match}
+            lethal={isLethal(match, !!binding)}
+            onEnter={() => setBoardOpen(true)}
+          />
+          <PomodoroLine quests={quests} />
+          <LuckPanel />
+          <MentorPanel />
+          <ClimbPanel
+            pillars={progress}
+            ready={progressHydrated}
+            streak={streak.current}
+            bestStreak={streak.best}
+            ladder={ladder}
+            season={season}
+          />
+          <UnlocksPanel pillars={progress} />
+        </>
+      )}
       <Rungs rungs={day.rungs} score={score} onToggle={toggleRung} />
       <QuestBoard
         quests={quests}
@@ -531,9 +542,13 @@ export default function Page() {
         onDelete={deleteQuest}
       />
       <ProblemsBoard problems={problems} onChange={setProblems} />
-      <SelfAuthoring />
-      <LensCards />
-      <SchoolsPanel schools={schools} />
+      {hasQuests && (
+        <>
+          <SelfAuthoring />
+          <LensCards />
+          <SchoolsPanel schools={schools} />
+        </>
+      )}
       <footer className="mx-auto max-w-md px-3 pt-6 text-center">
         <p className="font-pixel text-[7px] uppercase leading-relaxed text-ink/70">
           the main quest · this dashboard is a Loops-tier build. now go strike the boss.

@@ -82,14 +82,16 @@ export function BindingGoal({
             )}
           </div>
         )}
-        <a
-          href="https://buy.stripe.com/9B69ATgvw68B9As0m5aMU0D"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="btn mt-2 w-full bg-paper px-2 py-1.5 text-left text-base text-ink"
-        >
-          Founding license · $29 →
-        </a>
+        {(binding || recommended) && (
+          <a
+            href="https://buy.stripe.com/9B69ATgvw68B9As0m5aMU0D"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn mt-2 w-full bg-paper px-2 py-1.5 text-left text-base text-ink"
+          >
+            Founding license · $29 →
+          </a>
+        )}
       </div>
     </section>
   );

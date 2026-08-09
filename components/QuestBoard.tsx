@@ -165,7 +165,7 @@ export function QuestBoard({
   }
 
   return (
-    <section className="mx-auto max-w-md px-3 pt-4">
+    <section id="quest-log" className="mx-auto max-w-md scroll-mt-4 px-3 pt-4">
       <div className="mb-2 flex items-center justify-between gap-2">
         <h2 className="font-pixel text-[10px] uppercase text-ink">📜 quest log</h2>
         <div className="flex items-center gap-1.5">
