@@ -20,7 +20,15 @@ export const AETHER_SESSIONS: Record<string, AetherSession> = {
 const ROUTE_PATTERNS: Array<{ re: RegExp; session: string }> = [
   { re: /\b(text|message|dm|whatsapp|imessage|telegram|beeper|discord)\b/i, session: "beeper.chat" },
   { re: /\b(email|e-?mail|inbox|gmail|sprite)\b/i, session: "sprite.email" },
-  { re: /\b(moneymeta|invoice|stripe|deals?\s+ladder)\b/i, session: "moneymeta.fun" },
+  // Generic deals-ladder process vocabulary only. Deliberately no specific
+  // deal/buyer names (Anton, Regain, Summon, Michael, ...) — those are under
+  // Adam's standing "paused, never resurface without my explicit restart"
+  // ruling (CLAUDE.md, 2026-08-03); routing on their names would silently
+  // pull a stray mention back into active-pipeline territory.
+  {
+    re: /\b(moneymeta|invoice|stripe|deals?\s+ladder|pipeline|founding offer|warm intro|warm founders?|five-?figure|5-figure|proposal|deposit|scope call|mrr)\b/i,
+    session: "moneymeta.fun",
+  },
   { re: /\b(adam\.?gives|talk-?to menu)\b/i, session: "adam.gives" },
 ];
 
