@@ -32,6 +32,16 @@ const INCOME_POST: Item[] = [
 ];
 
 const STORAGE_KEY = "money-os-checklist-v1";
+const DEBT_KEY = "money-os-debt-v1";
+const DEBT_START = 13133;
+
+const ALL_ITEM_IDS = [
+  ...TIER0.map((i) => i.id),
+  ...TIER1.map((i) => i.id),
+  TIER2_INVOICE.id,
+  ...INCOME_COLLECT.map((i) => i.id),
+  ...INCOME_POST.map((i) => i.id),
+];
 
 function useChecklist() {
   const [checked, setChecked] = useState<Record<string, boolean>>({});
@@ -56,6 +66,31 @@ function useChecklist() {
   }
 
   return { checked, toggle, loaded };
+}
+
+function useDebt() {
+  const [debt, setDebt] = useState(DEBT_START);
+  const [input, setInput] = useState("");
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(DEBT_KEY);
+      if (raw) setDebt(Number(raw));
+    } catch {}
+  }, []);
+
+  function logPayment() {
+    const amount = Number(input);
+    if (!amount || amount <= 0) return;
+    const next = Math.max(0, debt - amount);
+    setDebt(next);
+    setInput("");
+    try {
+      localStorage.setItem(DEBT_KEY, String(next));
+    } catch {}
+  }
+
+  return { debt, input, setInput, logPayment };
 }
 
 function Checkbox({
@@ -119,6 +154,100 @@ function Card({ children, style }: { children: React.ReactNode; style?: React.CS
   );
 }
 
+function BossBar({
+  debt,
+  input,
+  setInput,
+  onLog,
+}: {
+  debt: number;
+  input: string;
+  setInput: (v: string) => void;
+  onLog: () => void;
+}) {
+  const pct = Math.max(0, Math.min(100, (debt / DEBT_START) * 100));
+  const defeated = debt <= 0;
+  return (
+    <Card style={{ marginBottom: "1rem" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "0.5rem" }}>
+        <p style={{ fontWeight: 700 }}>{defeated ? "BOSS DEFEATED" : "Debt boss fight"}</p>
+        <p style={{ fontFamily: "monospace", fontSize: "13px" }}>
+          {debt.toLocaleString()} / {DEBT_START.toLocaleString()} HP
+        </p>
+      </div>
+      <div
+        style={{
+          width: "100%",
+          height: "18px",
+          background: "#fff",
+          border: "2px solid var(--ink)",
+          borderRadius: "9px",
+          overflow: "hidden",
+        }}
+      >
+        <div
+          style={{
+            width: `${pct}%`,
+            height: "100%",
+            background: defeated ? "var(--grass-dark)" : pct > 50 ? "#b03a2e" : pct > 20 ? "#c98500" : "#3f9e2a",
+            transition: "width 0.4s ease",
+          }}
+        />
+      </div>
+      {!defeated && (
+        <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.7rem" }}>
+          <input
+            type="number"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="payment made, $"
+            style={{
+              flex: 1,
+              padding: "0.5rem 0.6rem",
+              border: "2px solid var(--ink)",
+              borderRadius: "8px",
+              fontSize: "14px",
+            }}
+          />
+          <button
+            onClick={onLog}
+            style={{
+              padding: "0.5rem 0.9rem",
+              background: "var(--ink)",
+              color: "var(--paper)",
+              border: "none",
+              borderRadius: "8px",
+              fontWeight: 700,
+              cursor: "pointer",
+            }}
+          >
+            hit
+          </button>
+        </div>
+      )}
+    </Card>
+  );
+}
+
+function QuestProgress({ checked }: { checked: Record<string, boolean> }) {
+  const done = ALL_ITEM_IDS.filter((id) => checked[id]).length;
+  const total = ALL_ITEM_IDS.length;
+  const pct = Math.round((done / total) * 100);
+  return (
+    <Card style={{ marginBottom: "1rem" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "0.5rem" }}>
+        <p style={{ fontWeight: 700 }}>Quest progress</p>
+        <p style={{ fontFamily: "monospace", fontSize: "13px" }}>
+          {done} / {total} · {pct}%
+        </p>
+      </div>
+      <div style={{ width: "100%", height: "10px", background: "#fff", border: "2px solid var(--ink)", borderRadius: "5px", overflow: "hidden" }}>
+        <div style={{ width: `${pct}%`, height: "100%", background: "var(--sky-top)", transition: "width 0.4s ease" }} />
+      </div>
+    </Card>
+  );
+}
+
 function Kpi({ label, value, danger }: { label: string; value: string; danger?: boolean }) {
   return (
     <div
@@ -141,6 +270,7 @@ function Kpi({ label, value, danger }: { label: string; value: string; danger?: 
 
 export default function MoneyOSPage() {
   const { checked, toggle, loaded } = useChecklist();
+  const { debt, input, setInput, logPayment } = useDebt();
 
   return (
     <div style={{ maxWidth: "760px", margin: "0 auto", padding: "2rem 1.1rem 5rem" }}>
@@ -152,11 +282,18 @@ export default function MoneyOSPage() {
       </h1>
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(140px,1fr))", gap: "10px", marginBottom: "1.75rem" }}>
-        <Kpi label="Income, active" value="$2,167/mo" />
+        <Kpi label="Verified stranger revenue" value="$0" />
         <Kpi label="Burn rate" value="$1,642/mo" />
-        <Kpi label="Card debt" value="$13,133" danger />
+        <Kpi label="Card debt" value={`$${debt.toLocaleString()}`} danger={debt > 0} />
         <Kpi label="Runway" value="0.2 mo" danger />
       </div>
+      <p style={{ fontSize: "11px", opacity: 0.5, marginTop: "-1.3rem", marginBottom: "1.5rem" }}>
+        No revenue chart: the only stranger charges on this Stripe account are two unrelated
+        personal sales, not fleet revenue. A chart here would misrepresent, not motivate.
+      </p>
+
+      <BossBar debt={debt} input={input} setInput={setInput} onLog={logPayment} />
+      <QuestProgress checked={checked} />
 
       <Card style={{ marginBottom: "1rem" }}>
         <p style={{ fontWeight: 700, marginBottom: "0.5rem" }}>Tier 0 — today, $0</p>
