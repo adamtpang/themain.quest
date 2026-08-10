@@ -31,8 +31,6 @@ const INCOME_POST: Item[] = [
   { id: "inc-adamgives", text: "adam.gives", amount: "$750-1,500" },
 ];
 
-const STORAGE_KEY = "money-os-checklist-v1";
-const DEBT_KEY = "money-os-debt-v1";
 const DEBT_START = 13133;
 
 const ALL_ITEM_IDS = [
@@ -43,24 +41,34 @@ const ALL_ITEM_IDS = [
   ...INCOME_POST.map((i) => i.id),
 ];
 
+async function postState(key: "checklist" | "debt", value: unknown) {
+  await fetch("/api/money-os-state", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ key, value }),
+  });
+}
+
+// Real shared state, backed by Neon Postgres, not localStorage. What's
+// checked here is the same regardless of which browser or device looks.
 function useChecklist() {
   const [checked, setChecked] = useState<Record<string, boolean>>({});
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) setChecked(JSON.parse(raw));
-    } catch {}
-    setLoaded(true);
+    fetch("/api/money-os-state")
+      .then((r) => r.json())
+      .then((state) => {
+        if (state.checklist) setChecked(state.checklist);
+        setLoaded(true);
+      })
+      .catch(() => setLoaded(true));
   }, []);
 
   function toggle(id: string) {
     setChecked((prev) => {
       const next = { ...prev, [id]: !prev[id] };
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-      } catch {}
+      postState("checklist", next);
       return next;
     });
   }
@@ -73,10 +81,12 @@ function useDebt() {
   const [input, setInput] = useState("");
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem(DEBT_KEY);
-      if (raw) setDebt(Number(raw));
-    } catch {}
+    fetch("/api/money-os-state")
+      .then((r) => r.json())
+      .then((state) => {
+        if (typeof state.debt === "number") setDebt(state.debt);
+      })
+      .catch(() => {});
   }, []);
 
   function logPayment() {
@@ -85,9 +95,7 @@ function useDebt() {
     const next = Math.max(0, debt - amount);
     setDebt(next);
     setInput("");
-    try {
-      localStorage.setItem(DEBT_KEY, String(next));
-    } catch {}
+    postState("debt", next);
   }
 
   return { debt, input, setInput, logPayment };
@@ -335,7 +343,7 @@ export default function MoneyOSPage() {
       </div>
 
       <p style={{ fontSize: "12px", opacity: 0.55, marginTop: "2rem" }}>
-        {loaded ? "Saved to this device." : "Loading saved state..."} Personal figures from
+        {loaded ? "Saved, real shared state via Neon, same on every device." : "Loading..."} Personal figures from
         deathmoney.fyi/private, statement data through May-Jul 2026. Fleet figures verified live
         2026-08-09.
       </p>
