@@ -9,3 +9,9 @@ kin:
     why: moneymeta is the income side of Adam's money OS; themain.quest is where the day-to-day moves that grow it (posting a draft, making a call) actually get tracked and executed.
   - repo: deathmoney.fyi
     why: deathmoney is the expense/debt side of the same money OS; themain.quest is where its real action items (the ASAP checklist tasks) live as daily quests instead of a static file nobody reopens.
+  - repo: eyeland.cards
+    why: eyeland.cards' DESIGN.md distills real game-origin-story research into concrete design rules for what makes a quest loop actually fun; Adam wants that same thinking applied to themain.quest, since it's the dashboard for the one game he considers the one that actually matters, his own life.
+  - repo: sprite.email
+    why: sprite already computes importance x urgency triage over every Gmail inbox and classifies REPLY/TASK/NOISE (triage-score.ts), a real source of candidate "one move" items (expiring API keys, verification deadlines) that themain.quest doesn't pull from yet.
+  - repo: optimism.fun
+    why: optimism.fun ranks which problems are worth a lifetime of work at civilizational scale, the macro choose-the-quest layer; this repo holds whatever quest Adam actually commits to as the one binding goal and runs it day to day, the micro execute-the-quest layer. Same quest-selection thesis, different scale.
