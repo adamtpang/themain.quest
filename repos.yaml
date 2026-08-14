@@ -15,3 +15,9 @@ kin:
     why: sprite already computes importance x urgency triage over every Gmail inbox and classifies REPLY/TASK/NOISE (triage-score.ts), a real source of candidate "one move" items (expiring API keys, verification deadlines) that themain.quest doesn't pull from yet.
   - repo: optimism.fun
     why: optimism.fun ranks which problems are worth a lifetime of work at civilizational scale, the macro choose-the-quest layer; this repo holds whatever quest Adam actually commits to as the one binding goal and runs it day to day, the micro execute-the-quest layer. Same quest-selection thesis, different scale.
+  - repo: ObsidianVault
+    why: Adam wants Obsidian to be the single knowledge base of his life. Its 8020.best/ boards are already impact x effort ranked with due dates, and Notes/Maps/Priority Board.md now runs a live Dataview query over all 13 boards, ranked deadline first then impact/effort. That ranked output is the real "one move" candidate feed themain.quest doesn't read from yet, a more complete source than sprite.email's inbox triage alone.
+  - repo: 8020.best
+    why: Same importance x urgency triage pattern as sprite.email and the ObsidianVault boards, applied to browser tabs instead of inbox or notes -- AI-buckets and tiers (S/A/B/C/D/F) open tabs weighted against the same FOCUS.md priorities themain.quest is built around, surfacing the top few as one-click "Next up" actions. Another candidate "one move" feed themain.quest doesn't pull from yet.
+  - repo: pokedex.life
+    why: This repo's own CLAUDE.md names WHO (people) as one of its three lenses alongside WHAT and WHERE, deep-linked out with nothing behind it yet. pokedex.life is the real WHO substance -- Trust (Character/Ability/Spark) scoring, Champion-tier ranking, a type-diversity check, and a Trust-override UI on Adam's actual X/IG graph -- built 2026-08-14, the natural destination for that deep link.
