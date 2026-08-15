@@ -99,6 +99,25 @@ export default function Home() {
         </div>
       </header>
 
+      {/* what this is, in plain words, for humans and bots skimming the top */}
+      <section className="mx-auto max-w-md px-3 pt-3">
+        <div className="panel bg-paper2 p-3">
+          <p className="text-sm leading-snug text-ink/80">
+            The Main Quest turns your one real-life goal into a boss fight. Days
+            become XP, habits become daily quests, and a life-left clock keeps
+            time honest, all on one mobile screen. Built for people who want to
+            run their own life like a game.
+          </p>
+          <ul className="mt-2 list-disc space-y-1 pl-4 text-sm leading-snug text-ink/70">
+            <li>One binding goal, tracked as the boss you&apos;re closing</li>
+            <li>Today&apos;s day-score across five daily rungs</li>
+            <li>A Motion Test on every quest, so busywork can&apos;t fake progress</li>
+            <li>A life-left clock in the header, so time stays real</li>
+            <li>Everything lives in your browser&apos;s local storage, nothing to sign up for</li>
+          </ul>
+        </div>
+      </section>
+
       {/* the ONE send: the day is won or lost right here */}
       <section className="mx-auto max-w-md px-3 pt-3">
         {day.sent ? (
@@ -153,6 +172,9 @@ export default function Home() {
         >
           ▶ the full game (board, match, schools, authoring)
         </Link>
+        <p className="mt-2 text-xs text-ink/50">
+          Built by Adam Pang, part of the adam.inc line of focused tools.
+        </p>
       </footer>
     </main>
   );

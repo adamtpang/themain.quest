@@ -17,9 +17,38 @@ const vt = VT323({
   display: "swap",
 });
 
+const SITE_URL = "https://themain.quest";
+const TITLE = "The Main Quest: Gamify Your Life";
+const DESCRIPTION =
+  "The Main Quest turns your one real goal into a boss fight. Days become XP, habits become daily quests, and a life-left clock keeps time honest, all on one mobile screen.";
+
 export const metadata: Metadata = {
-  title: "the main quest",
-  description: "Your one life, gamified. Days are XP. Close the boss. Welcome to Ooo.",
+  metadataBase: new URL(SITE_URL),
+  title: TITLE,
+  description: DESCRIPTION,
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    type: "website",
+    url: SITE_URL,
+    siteName: "The Main Quest",
+    title: TITLE,
+    description: DESCRIPTION,
+    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: TITLE }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: TITLE,
+    description: DESCRIPTION,
+    images: ["/opengraph-image"],
+  },
+  other: {
+    "ai-summary":
+      "The Main Quest is a single-screen, gamified life RPG: it turns your one binding goal into a boss fight, your days into XP, and your habits into daily quests, with a life-left clock that keeps time honest. No account required; state lives in the browser.",
+    "ai-facts":
+      "One binding goal tracked as a boss fight. Today's day-score across five daily rungs. A Motion Test on every quest so busywork can't fake progress. A life-left clock counts down remaining days. Built with Next.js, TypeScript, React, and Tailwind; no account required.",
+  },
 };
 
 export const viewport: Viewport = {
@@ -27,6 +56,39 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   themeColor: "#9bd9ff",
+};
+
+// Structured data for bots: an Organization node (adam.inc) publishing a
+// SoftwareApplication node (this app), with absolute @id/url on both so
+// crawlers can ground the entity instead of guessing from prose alone.
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": `${SITE_URL}/#organization`,
+      name: "adam.inc",
+      url: "https://adam.gives",
+      sameAs: ["https://adampang.com", "https://adam.gives"],
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": `${SITE_URL}/#app`,
+      name: "The Main Quest",
+      url: SITE_URL,
+      description: DESCRIPTION,
+      applicationCategory: "LifestyleApplication",
+      operatingSystem: "Web",
+      offers: {
+        "@type": "Offer",
+        price: "29",
+        priceCurrency: "USD",
+        url: "https://buy.stripe.com/9B69ATgvw68B9As0m5aMU0D",
+      },
+      publisher: { "@id": `${SITE_URL}/#organization` },
+      author: { "@id": `${SITE_URL}/#organization` },
+    },
+  ],
 };
 
 export default function RootLayout({
@@ -38,6 +100,11 @@ export default function RootLayout({
     <html lang="en" className={`${press.variable} ${vt.variable}`}>
       <body className="font-vt antialiased">
         {children}
+        <script
+          type="application/ld+json"
+          // eslint-disable-next-line react/no-danger
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
         <Analytics />
       </body>
     </html>
