@@ -13,6 +13,7 @@
 # misc
 .DS_Store
 *.pem
+/.ui-checks/
 
 # debug
 npm-debug.log*

@@ -283,7 +283,7 @@ export default function MoneyOSPage() {
   return (
     <div style={{ maxWidth: "760px", margin: "0 auto", padding: "2rem 1.1rem 5rem" }}>
       <p style={{ fontSize: "12px", textTransform: "uppercase", letterSpacing: "0.1em", opacity: 0.6, marginBottom: "0.3rem" }}>
-        money os — command center
+        money os: command center
       </p>
       <h1 style={{ fontSize: "26px", fontWeight: 800, marginBottom: "1.5rem" }}>
         Income vs expenses, real numbers
@@ -304,14 +304,14 @@ export default function MoneyOSPage() {
       <QuestProgress checked={checked} />
 
       <Card style={{ marginBottom: "1rem" }}>
-        <p style={{ fontWeight: 700, marginBottom: "0.5rem" }}>Tier 0 — today, $0</p>
+        <p style={{ fontWeight: 700, marginBottom: "0.5rem" }}>Tier 0: today, $0</p>
         {TIER0.map((item) => (
           <Checkbox key={item.id} item={item} checked={!!checked[item.id]} onToggle={() => toggle(item.id)} />
         ))}
       </Card>
 
       <Card style={{ marginBottom: "1rem" }}>
-        <p style={{ fontWeight: 700, marginBottom: "0.5rem" }}>Tier 1 — this week</p>
+        <p style={{ fontWeight: 700, marginBottom: "0.5rem" }}>Tier 1: this week</p>
         {TIER1.map((item) => (
           <Checkbox key={item.id} item={item} checked={!!checked[item.id]} onToggle={() => toggle(item.id)} />
         ))}
@@ -319,7 +319,7 @@ export default function MoneyOSPage() {
 
       <Card style={{ marginBottom: "1rem", opacity: 0.55 }}>
         <p style={{ fontWeight: 700, marginBottom: "0.5rem", textDecoration: "line-through" }}>
-          Tier 2 — balance transfer
+          Tier 2: balance transfer
         </p>
         <p style={{ fontSize: "13px" }}>Dead 2026-08-09, Wells Fargo declined. Don&apos;t try a third issuer.</p>
         <div style={{ marginTop: "0.4rem" }}>

@@ -46,7 +46,7 @@ export function LensCards() {
     <section className="mx-auto max-w-md px-3 pt-4">
       <h2 className="font-pixel text-[10px] uppercase text-ink">🌀 companion apps</h2>
       <p className="mb-2 text-sm text-ink/60">
-        Separate sites, not part of this dashboard — each opens in a new tab.
+        Separate sites, not part of this dashboard. Each opens in a new tab.
       </p>
       <div className="grid grid-cols-3 gap-2">
         {LENSES.map((l) => (

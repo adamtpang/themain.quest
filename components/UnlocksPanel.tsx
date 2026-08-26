@@ -53,7 +53,7 @@ export function UnlocksPanel({ pillars }: { pillars: PillarProgress }) {
         </div>
         <p className="mt-2 text-xs leading-snug text-ink/50">
           ⚙ = the app actually enforces it. Everything else is a real-world permission this board
-          tracks but cannot lock — you grant it to yourself once you've earned it.
+          tracks but cannot lock. You grant it to yourself once you've earned it.
         </p>
       </div>
     </section>

@@ -1,69 +1,64 @@
 # themain.quest
 
-A single-screen, mobile-first life dashboard. Every time you open it, it shows the ONE move that matters most right now and refuses to let motion masquerade as progress.
+A private, century-scale life command center with a public playable demo.
 
-## The four views
+The product keeps the long-range life vision connected to one clear move today. It converts the current Obsidian outbox into prioritized quests, gives XP only for completed real-world outcomes, visualizes momentum and life domains, and preserves lower-priority work below the fold.
 
-1. **Life-left** clock (sticky header): days left, percent of life spent, progress bar.
-2. **Today**: live day-score plus the five rungs.
-3. **The board**: quests, priority-sorted, with exactly ONE binding goal on top.
-4. **The three lenses**: WHO (people), WHAT (goals), WHERE (place), deep-linked out.
+## Routes
 
-## Core mechanics
+- `/` is the public product site.
+- `/board` is the original public, browser-local life game.
+- `/signin` is the single-user Google sign-in.
+- `/life` is the OAuth-protected life command center.
+- `/money-os` is also protected by the same approved Google identity.
 
-- **One clear goal.** The binding-goal slot holds exactly one quest. Crowning a new one demotes the old.
-- **Immediate feedback.** Checking a rung or closing a quest updates the score instantly, no save button.
-- **Challenge/skill balance.** The app nudges you toward the hardest open close, never the cozy busywork.
-- **Motion Test.** Does this leave something in the world, make money, or lock in progress? If no, it is flagged MOTION, earns zero points, and is parked below the fold. The binding-goal slot rejects motion.
+## Private command center
 
-## The day system
+The authenticated dashboard includes:
 
-Boots at 5/10. Five rungs climb to a perfect day:
+- one main quest selected by tier and inaction cost
+- a 25-minute focus strike
+- durable XP and completion history
+- seven-day momentum
+- progress across Stability, Body, Money, Love, and Create
+- quick quests with steps and explicit done conditions
+- a linked horizon map from 100 years to today
+- light and dark modes
 
-- 🧹 6 Loaded in
-- 🥇 7 Goal hit (keystone: without it the day caps at a wobble of 7)
-- 💚 8 Body taxed
-- ❤️ 9 Love logged
-- 🌅 10 Clean close
+In local development, the server reads `🐆 outbox.md` and `🌟 S-TIER LIFE.md` from the configured Obsidian vault. The browser never receives the raw files. A user-triggered sync stores the parsed private snapshot and progress ledger in the existing Neon key/value table so the production dashboard can use it without direct filesystem access.
 
-Score = 5 + rungs completed. Three rungs = 8 (a winning day). All five = 10.
+## Authentication setup
 
-## Priority order
+1. Create a Google OAuth web application.
+2. Add these authorized redirect URIs:
+   - `http://localhost:3000/api/auth/callback/google`
+   - `https://themain.quest/api/auth/callback/google`
+3. Copy `.env.example` to `.env.local`.
+4. Set `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `NEXTAUTH_SECRET`, `NEXTAUTH_URL`, and `AUTH_ALLOWED_EMAIL`.
+5. Set `DATABASE_URL` to the Neon database used by the app.
+6. Optionally set `OBSIDIAN_VAULT_PATH`. Local development otherwise uses `%USERPROFILE%\ObsidianVault`.
 
-`Life > Health.fun > Visa > Taxes > Leverage-maxxing > Marketplace-maxxing > Loops`
+`AUTH_DEV_BYPASS=true` is only for local visual verification. The code ignores it in production.
 
-Loops (tools, systems, meta-work) sorts dead last by design. This dashboard is itself a Loops-tier build.
-
-## Quest input (Obsidian bridge)
-
-Paste raw outbox lines (one per line). The app parses them into quests, auto-suggests a priority from keywords, and auto-flags obvious motion. Every auto-tag is editable with one tap. Bracket tags like `[im5 ef2]` are stripped.
-
-## Stack
-
-Next.js (App Router) + TypeScript + React + Tailwind. State in localStorage. No auth, no backend. Deploy target: Vercel.
-
-## Finn AI agent
-
-Finn is the in-app chatbot. He reads your live board (boss, rungs, quests, problems, KPIs) and helps you understand why your problems happen and beat them in the right order. He calls Claude (Sonnet 4.6) from a server route, so your API key never reaches the browser.
-
-To turn Finn on, set `ANTHROPIC_API_KEY`:
-
-- Local: copy `.env.example` to `.env.local` and paste your key.
-- Production: add `ANTHROPIC_API_KEY` in Vercel > Project > Settings > Environment Variables, then redeploy.
-
-Without a key, the rest of the app works and Finn politely says he is asleep.
-
-## Run locally
+## Run and verify
 
 ```bash
 npm install
 npm run dev
+npm run lint
+npm run build
 ```
 
-## Data
+The rendered UI verifier is available as `npm run verify:ui`. It expects Playwright and a browser executable through the environment described in `DESIGN.md`.
 
-All state lives in your browser's localStorage:
+## Architecture
 
-- `tmq.quests` the board
-- `tmq.day` today's date and rungs (resets daily)
-- `tmq.aff` affirmation rotation index
+- Next.js 16 App Router
+- React 19 and TypeScript
+- Tailwind CSS and shadcn/ui primitives
+- Auth.js through `next-auth` Google OAuth
+- Neon Postgres for cross-device state
+- Recharts for momentum visualization
+- Vercel Analytics
+
+No private vault content is committed to the repository.

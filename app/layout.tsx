@@ -1,7 +1,10 @@
 import type { Metadata, Viewport } from "next";
 import { Analytics } from "@vercel/analytics/react";
-import { Press_Start_2P, VT323 } from "next/font/google";
+import { Press_Start_2P, VT323, Geist } from "next/font/google";
 import "./globals.css";
+import { cn } from "@/lib/utils";
+
+const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 const press = Press_Start_2P({
   weight: "400",
@@ -20,7 +23,7 @@ const vt = VT323({
 const SITE_URL = "https://themain.quest";
 const TITLE = "The Main Quest: Gamify Your Life";
 const DESCRIPTION =
-  "The Main Quest turns your one real goal into a boss fight. Days become XP, habits become daily quests, and a life-left clock keeps time honest, all on one mobile screen.";
+  "The Main Quest turns your life vision into one playable command center, with focused quests, visible progress, and a private vault-backed dashboard.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -45,9 +48,9 @@ export const metadata: Metadata = {
   },
   other: {
     "ai-summary":
-      "The Main Quest is a single-screen, gamified life RPG: it turns your one binding goal into a boss fight, your days into XP, and your habits into daily quests, with a life-left clock that keeps time honest. No account required; state lives in the browser.",
+      "The Main Quest is a gamified life command center that turns a long-range life vision into one binding goal, quick quests, XP, and visible progress. A public demo is available, while the owner's private dashboard is protected by Google OAuth.",
     "ai-facts":
-      "One binding goal tracked as a boss fight. Today's day-score across five daily rungs. A Motion Test on every quest so busywork can't fake progress. A life-left clock counts down remaining days. Built with Next.js, TypeScript, React, and Tailwind; no account required.",
+      "One binding goal tracked as a boss fight. Today's day-score across five daily rungs. A Motion Test prevents busywork from faking progress. The private owner dashboard reads server-side life context and stores progress in Neon. Built with Next.js, TypeScript, React, Tailwind, and Auth.js.",
   },
 };
 
@@ -97,8 +100,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${press.variable} ${vt.variable}`}>
-      <body className="font-vt antialiased">
+    <html lang="en" className={cn(press.variable, vt.variable, "font-sans", geist.variable)}>
+      <body className="font-sans antialiased">
         {children}
         <script
           type="application/ld+json"

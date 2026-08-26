@@ -1,5 +1,5 @@
 export const BIRTH_DATE = "2002-07-31";
-export const LIFE_EXPECTANCY_YEARS = 75;
+export const LIFE_EXPECTANCY_YEARS = 100;
 
 export type LifeLeft = {
   daysLived: number;

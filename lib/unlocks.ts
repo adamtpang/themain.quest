@@ -25,14 +25,14 @@ export const UNLOCKS: Unlock[] = [
     pillar: "Health",
     level: 2,
     title: "One more turn a day",
-    description: "+1 crystal/day in The Match — built enough real stamina to carry one more focused pomodoro.",
+    description: "+1 crystal/day in The Match. Built enough real stamina to carry one more focused pomodoro.",
     mechanical: true,
   },
   {
     pillar: "Health",
     level: 4,
     title: "A full extra pomodoro",
-    description: "+1 crystal/day again (2 total over baseline) — your body can carry a genuinely full day now.",
+    description: "+1 crystal/day again (2 total over baseline). Your body can carry a genuinely full day now.",
     mechanical: true,
   },
   {
