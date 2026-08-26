@@ -15,17 +15,32 @@ export default async function OpengraphImage() {
           flexDirection: "column",
           justifyContent: "center",
           alignItems: "flex-start",
-          background: "#241b40",
+          background: "linear-gradient(135deg, #f3f8e5 0%, #d8f4ff 100%)",
           padding: "80px",
-          color: "#fff7e6",
-          fontFamily: "monospace",
+          color: "#07150a",
+          fontFamily: "sans-serif",
         }}
       >
-        <div style={{ fontSize: 28, color: "#ffcf4a", letterSpacing: 2 }}>❤️ THE MAIN QUEST</div>
-        <div style={{ fontSize: 64, marginTop: 24, lineHeight: 1.15, maxWidth: 900 }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            border: "4px solid #07150a",
+            borderRadius: 999,
+            background: "#ffcf4a",
+            boxShadow: "6px 7px 0 #07150a",
+            padding: "14px 24px",
+            fontSize: 26,
+            fontWeight: 700,
+            letterSpacing: 1,
+          }}
+        >
+          🧭 THE MAIN QUEST
+        </div>
+        <div style={{ fontSize: 68, fontWeight: 700, marginTop: 36, lineHeight: 1.08, maxWidth: 900 }}>
           Gamify your life. Close the boss.
         </div>
-        <div style={{ fontSize: 28, marginTop: 32, color: "#9bd9ff", maxWidth: 900, lineHeight: 1.4 }}>
+        <div style={{ fontSize: 28, marginTop: 32, color: "#00641a", maxWidth: 900, lineHeight: 1.4 }}>
           Days become XP. Habits become quests. One life-left clock keeps time honest.
         </div>
       </div>

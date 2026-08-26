@@ -19,7 +19,7 @@ const LENSES: Lens[] = [
     sub: "who",
     summary: "People who matter",
     href: "https://pokedex.life",
-    bg: "bg-bubblegum",
+    bg: "bg-blossom",
   },
   {
     key: "what",

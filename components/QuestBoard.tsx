@@ -96,7 +96,7 @@ function QuestRow({
           </span>
         )}
         {q.party && (
-          <span className="tag inline-flex items-center bg-bubblegum px-1.5 py-px text-sm uppercase leading-none text-ink">
+          <span className="tag inline-flex items-center bg-blossom px-1.5 py-px text-sm uppercase leading-none text-ink">
             🤝 {q.party} · +{Math.round(SYNERGY_BONUS_RATE * 100)}% xp
           </span>
         )}

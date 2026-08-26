@@ -7,6 +7,7 @@ const verifySource = fs.readFileSync(
   "utf8"
 );
 const outputDir = process.env.UI_OUTPUT_DIR || path.join(process.cwd(), ".ui-checks");
+const baseUrl = process.env.UI_BASE_URL || "http://localhost:3100";
 fs.mkdirSync(outputDir, { recursive: true });
 
 async function inspect(page, name, url, viewport, dark = false) {
@@ -35,10 +36,10 @@ async function inspect(page, name, url, viewport, dark = false) {
   page.on("pageerror", (error) => consoleErrors.push(error.message));
 
   const reports = {
-    publicDesktop: await inspect(page, "public-desktop", "http://localhost:3100", { width: 1440, height: 1000 }),
-    lifeDesktop: await inspect(page, "life-desktop", "http://localhost:3100/life", { width: 1440, height: 1000 }),
-    lifeDark: await inspect(page, "life-dark", "http://localhost:3100/life", { width: 1440, height: 1000 }, true),
-    lifeMobile: await inspect(page, "life-mobile", "http://localhost:3100/life", { width: 390, height: 844 }),
+    publicDesktop: await inspect(page, "public-desktop", baseUrl, { width: 1440, height: 1000 }),
+    lifeDesktop: await inspect(page, "life-desktop", `${baseUrl}/life`, { width: 1440, height: 1000 }),
+    lifeDark: await inspect(page, "life-dark", `${baseUrl}/life`, { width: 1440, height: 1000 }, true),
+    lifeMobile: await inspect(page, "life-mobile", `${baseUrl}/life`, { width: 390, height: 844 }),
     consoleErrors,
   };
 

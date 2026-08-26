@@ -3,56 +3,62 @@
 @tailwind utilities;
 
 :root {
-  --background: 48 33% 97%;
-  --foreground: 253 40% 18%;
+  /* Hero Meadow, playful warm daylight */
+  --background: 77.3 56.8% 93.6%;
+  --foreground: 133.1 48.9% 5.6%;
   --card: 0 0% 100%;
-  --card-foreground: 253 40% 18%;
+  --card-foreground: 133.1 48.9% 5.6%;
   --popover: 0 0% 100%;
-  --popover-foreground: 253 40% 18%;
-  --primary: 253 40% 18%;
-  --primary-foreground: 48 100% 96%;
-  --secondary: 198 73% 92%;
-  --secondary-foreground: 253 40% 18%;
-  --muted: 46 25% 92%;
-  --muted-foreground: 250 10% 42%;
-  --accent: 48 100% 68%;
-  --accent-foreground: 253 40% 18%;
-  --destructive: 0 70% 55%;
-  --destructive-foreground: 0 0% 100%;
-  --border: 248 19% 84%;
-  --input: 248 19% 84%;
-  --ring: 253 70% 62%;
-  --radius: 1rem;
-  --ink: #241b40;
-  --paper: #fff7e6;
-  --paper2: #ffeccb;
-  --sky-top: #7cc9ff;
-  --sky-bot: #c7ecff;
-  --grass: #5fbf3a;
-  --grass-dark: #3f9e2a;
+  --popover-foreground: 133.1 48.9% 5.6%;
+  --primary: 135.4 100% 19.7%;
+  --primary-foreground: 240 0% 97.4%;
+  --secondary: 77.2 30.7% 86%;
+  --secondary-foreground: 133.1 48.9% 5.6%;
+  --muted: 77.3 32.9% 89.1%;
+  --muted-foreground: 130.2 10% 26%;
+  --accent: 129.2 21.2% 85.2%;
+  --accent-foreground: 133.1 48.9% 5.6%;
+  --destructive: 352 93.3% 37.8%;
+  --destructive-foreground: 240 0% 97.4%;
+  --border: 77.1 15.3% 72.7%;
+  --input: 77.3 37.4% 90.4%;
+  --ring: 135.4 100% 19.7%;
+  --radius: 1.125rem;
+  --ink: #07150a;
+  --paper: #f3f8e5;
+  --paper2: #e7ecda;
+  --sky-top: #89d8ff;
+  --sky-bot: #d8f4ff;
+  --grass: #68db70;
+  --grass-dark: #00641a;
+  --gradient-bg: linear-gradient(135deg, oklch(0.97 0.025 120) 0%, oklch(0.94 0.03 135) 100%);
+  --gradient-accent: linear-gradient(to right, oklch(0.43 0.15 150) 0%, oklch(0.46 0.17 180) 100%);
   color-scheme: light;
 }
 
 .dark {
-  --background: 250 29% 8%;
-  --foreground: 48 25% 94%;
-  --card: 250 25% 12%;
-  --card-foreground: 48 25% 94%;
-  --popover: 250 25% 12%;
-  --popover-foreground: 48 25% 94%;
-  --primary: 48 100% 68%;
-  --primary-foreground: 253 40% 18%;
-  --secondary: 250 16% 19%;
-  --secondary-foreground: 48 25% 94%;
-  --muted: 250 16% 19%;
-  --muted-foreground: 248 12% 66%;
-  --accent: 197 83% 65%;
-  --accent-foreground: 253 40% 12%;
-  --destructive: 0 62% 48%;
-  --destructive-foreground: 0 0% 100%;
-  --border: 250 14% 24%;
-  --input: 250 14% 24%;
-  --ring: 48 100% 68%;
+  /* Hero Meadow, moonlit forest */
+  --background: 137.7 80.7% 1.7%;
+  --foreground: 118.9 27.1% 95.7%;
+  --card: 140.6 62.4% 4.6%;
+  --card-foreground: 118.9 27.1% 95.7%;
+  --popover: 142.4 50.2% 6.2%;
+  --popover-foreground: 118.9 27.1% 95.7%;
+  --primary: 124.2 61.6% 63.3%;
+  --primary-foreground: 140 0% 1.3%;
+  --secondary: 142.6 42.5% 9%;
+  --secondary-foreground: 118.9 27.1% 95.7%;
+  --muted: 142.3 44.5% 7.1%;
+  --muted-foreground: 119 3% 64.1%;
+  --accent: 120.9 20.4% 12.6%;
+  --accent-foreground: 118.9 27.1% 95.7%;
+  --destructive: 358.2 65.5% 50.8%;
+  --destructive-foreground: 240 0% 97.4%;
+  --border: 140.7 24.1% 16.1%;
+  --input: 140.6 62.4% 4.6%;
+  --ring: 124.2 61.6% 63.3%;
+  --gradient-bg: linear-gradient(135deg, oklch(0.12 0.025 155) 0%, oklch(0.15 0.03 170) 100%);
+  --gradient-accent: linear-gradient(to right, oklch(0.80 0.18 145) 0%, oklch(0.82 0.19 180) 100%);
   color-scheme: dark;
 }
 
@@ -66,9 +72,7 @@
 
   body {
     @apply min-h-screen bg-background text-foreground;
-    background-image:
-      radial-gradient(circle at 8% -10%, rgba(124, 201, 255, 0.22), transparent 28rem),
-      radial-gradient(circle at 100% 10%, rgba(255, 207, 74, 0.16), transparent 24rem);
+    background-image: var(--gradient-bg);
     background-attachment: fixed;
   }
 
@@ -77,13 +81,66 @@
 
 main { position: relative; z-index: 1; }
 
+.quest-card {
+  border: 3px solid hsl(var(--border));
+  border-radius: 1.45rem 1.15rem 1.6rem 1.25rem;
+  box-shadow: 4px 4px 0 0 var(--ink);
+}
+
+.quest-card:nth-child(even) {
+  border-radius: 1.15rem 1.55rem 1.25rem 1.45rem;
+}
+
+.quest-button {
+  border: 3px solid var(--ink);
+  border-radius: 999px;
+  box-shadow: 3px 3px 0 0 var(--ink);
+  transition: transform 120ms ease, box-shadow 120ms ease, background-color 160ms ease;
+}
+
+.quest-button:active {
+  transform: translate(3px, 3px);
+  box-shadow: none;
+}
+
+.world-sun {
+  border: 4px solid var(--ink);
+  border-radius: 48% 52% 46% 54%;
+  background: #ffcf4a;
+  box-shadow: 6px 7px 0 0 var(--ink);
+}
+
+.world-cloud {
+  border: 4px solid var(--ink);
+  border-radius: 999px;
+  background: white;
+  box-shadow: 4px 5px 0 0 var(--ink);
+}
+
+.world-hill {
+  border: 4px solid var(--ink);
+  border-radius: 50% 50% 0 0;
+  background: var(--grass);
+}
+
+.world-grid {
+  background-image:
+    linear-gradient(hsl(var(--border) / 0.24) 1px, transparent 1px),
+    linear-gradient(90deg, hsl(var(--border) / 0.24) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.dark .quest-card {
+  box-shadow: 4px 4px 0 0 hsl(var(--border));
+}
+
 /* Legacy game primitives remain available to the public board. */
 .panel { border: 3px solid var(--ink); box-shadow: 4px 4px 0 0 var(--ink); }
-.inset { background: var(--paper2); border: 3px solid var(--ink); box-shadow: inset 2px 2px 0 0 rgba(36, 27, 64, 0.25); }
+.inset { background: var(--paper2); border: 3px solid var(--ink); box-shadow: inset 2px 2px 0 0 rgba(7, 21, 10, 0.25); }
 .btn { border: 3px solid var(--ink); box-shadow: 3px 3px 0 0 var(--ink); transition: transform 0.05s ease, box-shadow 0.05s ease; }
 .btn:active { transform: translate(3px, 3px); box-shadow: 0 0 0 0 var(--ink); }
 .tag { border: 2px solid var(--ink); box-shadow: 2px 2px 0 0 var(--ink); }
-.bar { border: 3px solid var(--ink); background: var(--paper2); box-shadow: inset 2px 2px 0 0 rgba(36, 27, 64, 0.25); }
+.bar { border: 3px solid var(--ink); background: var(--paper2); box-shadow: inset 2px 2px 0 0 rgba(7, 21, 10, 0.25); }
 
 @keyframes floatup {
   0% { opacity: 1; transform: translateY(0) scale(1); }
@@ -106,6 +163,15 @@ main { position: relative; z-index: 1; }
   100% { transform: translateY(0) scale(1); }
 }
 .cardplay { animation: cardplay 0.28s ease-out; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
 
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-track { background: transparent; }

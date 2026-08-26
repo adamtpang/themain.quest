@@ -8,7 +8,7 @@ export function SignInButton({ callbackUrl = "/life" }: { callbackUrl?: string }
   return (
     <Button
       size="lg"
-      className="h-12 w-full rounded-xl bg-[#241b40] text-base text-white shadow-lg shadow-[#241b40]/15 hover:bg-[#322650]"
+      className="quest-button h-12 w-full bg-primary text-base text-primary-foreground hover:bg-primary/90"
       onClick={() => signIn("google", { callbackUrl: safeCallback })}
     >
       <svg viewBox="0 0 24 24" aria-hidden="true" className="h-4 w-4">

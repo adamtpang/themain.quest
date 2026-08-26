@@ -321,7 +321,7 @@ export function TheBoard({
               </button>
               <button
                 onClick={() => setDied(false)}
-                className={`btn flex-1 py-2 font-pixel text-[9px] uppercase text-ink ${died === false ? "bg-bubblegum" : "bg-paper2"}`}
+                className={`btn flex-1 py-2 font-pixel text-[9px] uppercase text-ink ${died === false ? "bg-blossom" : "bg-paper2"}`}
               >
                 🏃 escaped
               </button>

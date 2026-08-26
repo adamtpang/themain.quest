@@ -43,28 +43,33 @@ const config: Config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        // Land of Ooo palette
-        ink: "#241b40", // deep grape, used for all borders + text
-        paper: "#fff7e6", // cream panel
-        paper2: "#ffeccb", // warmer inset
-        sky: "#9bd9ff",
-        grass: "#5fbf3a",
-        bubblegum: "#ff5fa2",
+        // Hero Meadow palette
+        ink: "#07150a",
+        paper: "#f3f8e5",
+        paper2: "#e7ecda",
+        sky: "#89d8ff",
+        grass: "#68db70",
+        blossom: "#ff5fa2",
         gold: "#ffcf4a",
-        bmo: "#3fc7b6",
-        // Priority tags, re-skinned to Ooo characters
-        life: "#ff5d5d", // candy red
-        health: "#54c244", // grass green
-        visa: "#2f9ee0", // Finn blue
-        taxes: "#f6a623", // Jake orange
-        leverage: "#a06bff", // LSP lavender
-        marketplace: "#2fc2b0", // BMO teal
-        loops: "#8b86a3", // Marceline grey
+        stream: "#3fc7b6",
+        // Priority tags use the same bright meadow world.
+        life: "#ff5d5d",
+        health: "#54c244",
+        visa: "#2f9ee0",
+        taxes: "#f6a623",
+        leverage: "#a06bff",
+        marketplace: "#2fc2b0",
+        loops: "#8b86a3",
       },
       fontFamily: {
         sans: ["var(--font-sans)", "ui-sans-serif", "system-ui", "sans-serif"],
+        mono: ["var(--font-mono)", "ui-monospace", "SFMono-Regular", "monospace"],
         pixel: ["var(--font-press)", "ui-monospace", "monospace"],
         vt: ["var(--font-vt)", "ui-monospace", "monospace"],
+      },
+      backgroundImage: {
+        "brand-bg": "var(--gradient-bg)",
+        "brand-accent": "var(--gradient-accent)",
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -72,9 +77,9 @@ const config: Config = {
         sm: "calc(var(--radius) - 4px)",
       },
       boxShadow: {
-        pix: "4px 4px 0 0 #241b40",
-        "pix-sm": "2px 2px 0 0 #241b40",
-        "pix-lg": "6px 6px 0 0 #241b40",
+        pix: "4px 4px 0 0 #07150a",
+        "pix-sm": "2px 2px 0 0 #07150a",
+        "pix-lg": "6px 6px 0 0 #07150a",
       },
       keyframes: {
         pop: {
