@@ -28,7 +28,7 @@ export function AffirmationBanner() {
 
   return (
     <div className="mx-auto max-w-md px-3 pt-3">
-      <div className="panel bg-bubblegum px-3 py-2">
+      <div className="panel bg-blossom px-3 py-2">
         <p className="font-pixel text-[7px] uppercase text-ink/70">today you are</p>
         <p
           key={idx}

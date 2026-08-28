@@ -13,6 +13,9 @@
 # misc
 .DS_Store
 *.pem
+/.ui-checks/
+/.brand-preview/
+/app/globals.css.bak
 
 # debug
 npm-debug.log*

@@ -121,7 +121,7 @@ export function SelfAuthoring() {
                 <div
                   key={i}
                   className={`px-2 py-1.5 text-base leading-snug ${
-                    m.role === "user" ? "tag ml-8 bg-bubblegum text-ink" : "panel mr-6 bg-paper text-ink"
+                    m.role === "user" ? "tag ml-8 bg-blossom text-ink" : "panel mr-6 bg-paper text-ink"
                   }`}
                 >
                   {m.content || (loading && i === msgs.length - 1 ? "..." : "")}

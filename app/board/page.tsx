@@ -537,7 +537,7 @@ export default function Page() {
           <Collapsible
             storageKey="tmq.section.progress.open"
             title="🏆 progress"
-            subtitle="rank, pillars, unlocks, schools, luck — how you're doing over time"
+            subtitle="rank, pillars, unlocks, schools, luck: how you're doing over time"
           >
             <ClimbPanel
               pillars={progress}

@@ -109,7 +109,7 @@ export function FinnChat({ context }: { context: unknown }) {
                   key={i}
                   className={`px-2 py-1.5 text-base leading-snug ${
                     m.role === "user"
-                      ? "tag ml-8 bg-bubblegum text-ink"
+                      ? "tag ml-8 bg-blossom text-ink"
                       : "panel mr-6 bg-paper text-ink"
                   }`}
                 >

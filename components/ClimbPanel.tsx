@@ -145,7 +145,7 @@ export function ClimbPanel({
 
         <div className="flex items-end justify-between">
           <div>
-            <span key={current.name} className="animate-pop block font-pixel text-base text-gold drop-shadow-[2px_2px_0_#241b40]">
+            <span key={current.name} className="animate-pop block font-pixel text-base text-gold drop-shadow-[2px_2px_0_#07150a]">
               {current.name}
             </span>
             <span className="text-sm text-ink/70">rank</span>

@@ -12,7 +12,7 @@ export function FirstRunBanner() {
       <div className="panel bg-visa px-3 py-3">
         <p className="font-pixel text-[8px] uppercase text-paper">first time here?</p>
         <p className="mt-1 text-lg leading-snug text-paper">
-          This is your life, gamified. Paste today&rsquo;s to-do list below — one line per task — and
+          This is your life, gamified. Paste today&rsquo;s to-do list below, one line per task, and
           the board builds itself: a boss to fight, a score that only moves on real closes.
         </p>
         <a
