@@ -1,8 +1,8 @@
 # themain.quest
 
-A private, century-scale life command center with a public playable demo.
+A private life command center that turns the current Obsidian outbox into one playable next quest.
 
-The product keeps the long-range life vision connected to one clear move today. It converts the current Obsidian outbox into prioritized quests, gives XP only for completed real-world outcomes, visualizes momentum and life domains, and preserves lower-priority work below the fold.
+The private runner is intentionally narrower than a dashboard. It shows one goal, one physical next action, one stopwatch, and three choices: finish it, make it smaller, or skip it with a reason. Everything else stays preserved in the source outbox.
 
 ## Routes
 
@@ -12,20 +12,29 @@ The product keeps the long-range life vision connected to one clear move today. 
 - `/life` is the OAuth-protected life command center.
 - `/money-os` is also protected by the same approved Google identity.
 
-## Private command center
+## Private quest runner
 
-The authenticated dashboard includes:
+The authenticated `/life` route includes:
 
-- one main quest selected by tier and inaction cost
-- a 25-minute focus strike
-- durable XP and completion history
-- seven-day momentum
-- progress across Stability, Body, Money, Love, and Create
-- quick quests with steps and explicit done conditions
-- a linked horizon map from 100 years to today
+- exactly one current quest, selected from the open outbox by tier, priority, and inaction cost
+- a clear `Done means` goal and one concrete `Do this now` action
+- a 2, 5, 10, or 25-minute count-up stopwatch with immediate progress feedback
+- `Too hard? Make it smaller`, which asks the local AI agent for a sub-two-minute physical action while preserving the original goal
+- a safe deterministic fallback when the local AI agent is unavailable
+- `Skip and explain why`, which preserves the quest, records the reason, and advances to the next open quest
+- a visible Level, XP, and Day score strip plus durable completions, skip reasons, challenge adjustments, and a compact learning summary
+- a `Process vault` control that runs the vault-only portion of the local `process` skill and refreshes the outbox-backed quest state
 - light and dark modes
 
-In local development, the server reads `🐆 outbox.md` and `🌟 S-TIER LIFE.md` from the configured Obsidian vault. The browser never receives the raw files. A user-triggered sync stores the parsed private snapshot and progress ledger in the existing Neon key/value table so the production dashboard can use it without direct filesystem access.
+In local development, the server reads only `🐆 outbox.md` from the configured Obsidian vault. The browser receives only parsed day-scoped quest and game-state fields. Tier 1 is the highest strategic tier. Quest instances are scoped to the current day so a recurring task does not inherit yesterday's completion. The local `Process` and AI shrink actions use the owner's authenticated Claude CLI subscription, not an API key. They are fixed-purpose server actions and cannot execute arbitrary browser-supplied commands.
+
+Process edits an isolated copy of the vault with file-only tools. This dashboard action is deliberately vault-only. It does not fetch a live calendar or route work into external Aether repositories. Run the full `$process` workflow in Codex when calendar ingestion or project routing is required. The server rejects deletions, lost task captures, non-Markdown changes, invalid day queues, concurrent live edits, and disallowed punctuation before it applies validated files to the live vault. Each applied run keeps a durable local recovery journal and the original changed files under `.tmq-process-backups`. Interrupted runs are rolled back before another Process run begins. If vault changes commit before the Neon snapshot succeeds, the journal remains pending and the next vault Process run retries synchronization. Every successful user-triggered run then stores the minimal parsed private snapshot and progress ledger in Neon so the deployed dashboard can display the latest synchronized state without direct filesystem access. Neon writes use optimistic revisions and retries so concurrent actions cannot silently overwrite one another, while read failures stop mutations instead of becoming empty progress. Vercel cannot reach the private vault or local Claude CLI, so `Process vault` and AI shrink are local-desktop capabilities. The deployed experience keeps the protected snapshot, completion, skip, and built-in shrink behavior. All state mutations require same-origin JSON. Local bypass mutations also require an ephemeral high-entropy capability.
+
+## Flow design basis
+
+The runner makes three well-supported flow antecedents visible on every quest: clear goals, immediate feedback, and challenge-skill balance. The implementation also uses autonomy, short timeboxes, a low-friction start, and recovery-friendly scope. These choices align with [FlowState's practical pillars](https://www.flowstate.com/flow/pillars), the [Flow Research Collective](https://www.flowresearchcollective.com/), a [meta-analysis of challenge-skill balance](https://www.tandfonline.com/doi/full/10.1080/17439760.2014.967799), and a [review of workplace flow interventions](https://pmc.ncbi.nlm.nih.gov/articles/PMC10360049/).
+
+Marketing multipliers are not treated as scientific facts. The product uses the recurring design principles, then learns from the owner's actual completions, skips, and challenge adjustments.
 
 ## Authentication setup
 
@@ -37,8 +46,12 @@ In local development, the server reads `🐆 outbox.md` and `🌟 S-TIER LIFE.md
 4. Set `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `NEXTAUTH_SECRET`, `NEXTAUTH_URL`, and `AUTH_ALLOWED_EMAIL`.
 5. Set `DATABASE_URL` to the Neon database used by the app.
 6. Optionally set `OBSIDIAN_VAULT_PATH`. Local development otherwise uses `%USERPROFILE%\ObsidianVault`.
+7. Keep `LIFE_LOCAL_AGENT_ENABLED=true` to enable the local Process and AI shrink actions.
+8. Optionally set `CLAUDE_CLI_PATH` or `LIFE_LOCAL_AGENT_MODEL`. The defaults use `claude` and `sonnet`.
 
 `AUTH_DEV_BYPASS=true` is only for local visual verification. The code ignores it in production.
+
+`ANTHROPIC_API_KEY` is not required or supported by the private quest runner.
 
 ## Run and verify
 
@@ -49,7 +62,7 @@ npm run lint
 npm run build
 ```
 
-The rendered UI verifier is available as `npm run verify:ui`. It expects Playwright and a browser executable through the environment described in `DESIGN.md`.
+The rendered UI verifier is available as `npm run verify:ui`. The interaction verifier is `node scripts/verify-life-quest-loop.cjs`. Both expect Playwright and a browser executable through the environment described in `DESIGN.md`.
 
 ## Architecture
 
@@ -58,7 +71,7 @@ The rendered UI verifier is available as `npm run verify:ui`. It expects Playwri
 - Tailwind CSS and shadcn/ui primitives
 - Auth.js through `next-auth` Google OAuth
 - Neon Postgres for cross-device state
-- Recharts for momentum visualization
+- local Claude CLI subscription bridge for Process and adaptive shrinking
 - Vercel Analytics
 
 No private vault content is committed to the repository.

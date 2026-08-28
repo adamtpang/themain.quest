@@ -1,5 +1,6 @@
 import { getToken } from "next-auth/jwt";
 import { NextRequest, NextResponse } from "next/server";
+import { developmentAuthBypassEnabled } from "@/lib/auth-options";
 
 const PAGE_PREFIXES = ["/life", "/money-os"];
 const API_PREFIXES = ["/api/life-state", "/api/money-os-state"];
@@ -11,10 +12,7 @@ export async function proxy(req: NextRequest) {
 
   if (!isApi && !isPage) return NextResponse.next();
 
-  if (
-    process.env.NODE_ENV !== "production" &&
-    process.env.AUTH_DEV_BYPASS === "true"
-  ) {
+  if (developmentAuthBypassEnabled()) {
     return NextResponse.next();
   }
 

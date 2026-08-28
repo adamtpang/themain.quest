@@ -3,7 +3,14 @@ const path = require("path");
 const { chromium } = require("playwright");
 
 const verifySource = fs.readFileSync(
-  "C:\\Users\\adamp\\.agents\\skills\\beautify\\scripts\\verify_ui.js",
+  process.env.BEAUTIFY_VERIFY_SCRIPT || path.join(
+    process.env.USERPROFILE || process.env.HOME || "",
+    ".agents",
+    "skills",
+    "beautify",
+    "scripts",
+    "verify_ui.js"
+  ),
   "utf8"
 );
 const outputDir = process.env.UI_OUTPUT_DIR || path.join(process.cwd(), ".ui-checks");
@@ -23,8 +30,10 @@ async function inspect(page, name, url, viewport, dark = false) {
   return report;
 }
 
+let browser;
+
 (async () => {
-  const browser = await chromium.launch({
+  browser = await chromium.launch({
     executablePath: process.env.BROWSER_EXECUTABLE || chromium.executablePath(),
     headless: true,
   });
@@ -43,9 +52,16 @@ async function inspect(page, name, url, viewport, dark = false) {
     consoleErrors,
   };
 
+  for (const [name, report] of Object.entries(reports).filter(([name]) => name !== "consoleErrors")) {
+    if (report.horizontalOverflow) throw new Error(`${name} has page-level horizontal overflow`);
+    if (report.skeletonsLeft > 0) throw new Error(`${name} left ${report.skeletonsLeft} loading skeletons`);
+  }
+  if (consoleErrors.length) throw new Error(`Console errors: ${consoleErrors.join(" | ")}`);
+
   console.log(JSON.stringify(reports, null, 2));
-  await browser.close();
 })().catch((error) => {
   console.error(error);
   process.exitCode = 1;
+}).finally(async () => {
+  await browser?.close();
 });

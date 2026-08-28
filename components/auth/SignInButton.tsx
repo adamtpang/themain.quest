@@ -1,10 +1,26 @@
 "use client";
 
+import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
+import { safeAppCallback } from "@/lib/safe-callback";
 
-export function SignInButton({ callbackUrl = "/life" }: { callbackUrl?: string }) {
-  const safeCallback = callbackUrl.startsWith("/") ? callbackUrl : "/life";
+export function SignInButton({
+  callbackUrl = "/life",
+  localPreview = false,
+}: {
+  callbackUrl?: string;
+  localPreview?: boolean;
+}) {
+  const safeCallback = safeAppCallback(callbackUrl);
+  if (localPreview) {
+    return (
+      <Button asChild size="lg" className="quest-button h-12 w-full bg-primary text-base text-primary-foreground hover:bg-primary/90">
+        <Link href={safeCallback}>Open local preview</Link>
+      </Button>
+    );
+  }
+
   return (
     <Button
       size="lg"

@@ -1,6 +1,7 @@
 import { LockKeyhole, ShieldCheck, Sparkles } from "lucide-react";
 import type { Metadata } from "next";
 import { SignInButton } from "@/components/auth/SignInButton";
+import { developmentAuthBypassEnabled } from "@/lib/auth-options";
 
 export const metadata: Metadata = {
   title: "Private Sign In | The Main Quest",
@@ -13,6 +14,7 @@ export default async function SignInPage({
   searchParams: Promise<{ callbackUrl?: string }>;
 }) {
   const params = await searchParams;
+  const localPreview = developmentAuthBypassEnabled();
   return (
     <main className="flex min-h-screen items-center justify-center bg-brand-bg px-5 py-12">
       <div className="quest-card grid w-full max-w-5xl overflow-hidden border-ink bg-card lg:grid-cols-[1.1fr_0.9fr]">
@@ -40,13 +42,17 @@ export default async function SignInPage({
               <LockKeyhole className="h-3.5 w-3.5" /> Private command center
             </div>
             <h2 className="mt-5 text-3xl font-semibold tracking-tight">Welcome back</h2>
-            <p className="mt-3 text-sm leading-6 text-muted-foreground">Sign in with the single approved Google account to open your vault-backed life dashboard.</p>
+            <p className="mt-3 text-base leading-7 text-muted-foreground">
+              {localPreview
+                ? "Local preview access is enabled on this machine. Production still requires the single approved Google account."
+                : "Sign in with the single approved Google account to open your vault-backed life dashboard."}
+            </p>
             <div className="mt-8">
-              <SignInButton callbackUrl={params.callbackUrl} />
+              <SignInButton callbackUrl={params.callbackUrl} localPreview={localPreview} />
             </div>
-            <div className="mt-8 grid gap-3 text-sm text-muted-foreground">
+            <div className="mt-8 grid gap-3 text-base text-muted-foreground">
               <div className="flex gap-3"><ShieldCheck className="mt-0.5 h-4 w-4 text-primary" /><span>Email allowlist plus signed server sessions.</span></div>
-              <div className="flex gap-3"><Sparkles className="mt-0.5 h-4 w-4 text-stream" /><span>Live quests, XP, horizons, and private progress data.</span></div>
+              <div className="flex gap-3"><Sparkles className="mt-0.5 h-4 w-4 text-stream" /><span>Live quests, XP, and private progress data.</span></div>
             </div>
           </div>
         </section>

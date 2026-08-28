@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Analytics } from "@vercel/analytics/react";
-import { Press_Start_2P, Space_Grotesk, Space_Mono, VT323 } from "next/font/google";
+import { Press_Start_2P, Space_Grotesk, Space_Mono } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 
@@ -21,13 +21,6 @@ const press = Press_Start_2P({
   weight: "400",
   subsets: ["latin"],
   variable: "--font-press",
-  display: "swap",
-});
-
-const vt = VT323({
-  weight: "400",
-  subsets: ["latin"],
-  variable: "--font-vt",
   display: "swap",
 });
 
@@ -111,7 +104,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={cn(sans.variable, mono.variable, press.variable, vt.variable, "font-sans")}>
+    <html lang="en" className={cn(sans.variable, mono.variable, press.variable, "font-sans")}>
       <body className="font-sans antialiased">
         {children}
         <script
@@ -119,7 +112,7 @@ export default function RootLayout({
           // eslint-disable-next-line react/no-danger
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
-        <Analytics />
+        {process.env.VERCEL ? <Analytics /> : null}
       </body>
     </html>
   );

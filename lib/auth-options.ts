@@ -10,6 +10,10 @@ export function isAllowedEmail(email: string | null | undefined): boolean {
   return Boolean(allowed && email && email.toLowerCase() === allowed);
 }
 
+export function developmentAuthBypassEnabled(environment: NodeJS.ProcessEnv = process.env): boolean {
+  return environment.NODE_ENV !== "production" && environment.AUTH_DEV_BYPASS === "true";
+}
+
 export const authOptions: NextAuthOptions = {
   providers: [
     GoogleProvider({
