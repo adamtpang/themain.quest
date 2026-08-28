@@ -33,7 +33,7 @@ export default function PrivacyPage() {
       </InfoSection>
       <InfoSection title="Service providers and sharing">
         <p>
-          Vercel provides hosting and limited site analytics, Google provides owner authentication, and Neon provides protected progress storage. The Main Quest does not sell private life data or use public pages to disclose the owner's vault, finances, calendar, or day plan.
+          Vercel provides hosting and request delivery, Google provides owner authentication, and Neon provides protected progress storage. The Main Quest does not sell private life data or use public pages to disclose the owner's vault, finances, calendar, or day plan.
         </p>
       </InfoSection>
       <InfoSection title="Choices and contact">
