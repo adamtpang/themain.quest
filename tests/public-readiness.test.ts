@@ -3,6 +3,10 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 import nextConfig from "../next.config.mjs";
 import sitemap from "../app/sitemap";
+import {
+  BASELINE_CONTENT_SECURITY_POLICY,
+  CLERK_CONTENT_SECURITY_POLICY,
+} from "../lib/security-headers";
 
 test("public routes publish strict security headers", async () => {
   assert.equal(typeof nextConfig.headers, "function");
@@ -11,12 +15,13 @@ test("public routes publish strict security headers", async () => {
     rules.flatMap((rule) => rule.headers).map((header) => [header.key, header.value]),
   );
 
-  const csp = headers.get("Content-Security-Policy") ?? "";
-  assert.match(csp, /default-src 'self'/);
-  assert.match(csp, /object-src 'none'/);
-  assert.match(csp, /frame-ancestors 'none'/);
-  assert.doesNotMatch(csp, /https?:\/\/\*/);
   assert.equal(headers.get("X-Content-Type-Options"), "nosniff");
+  assert.match(BASELINE_CONTENT_SECURITY_POLICY, /default-src 'self'/);
+  assert.match(BASELINE_CONTENT_SECURITY_POLICY, /object-src 'none'/);
+  assert.match(BASELINE_CONTENT_SECURITY_POLICY, /frame-ancestors 'none'/);
+  assert.equal(CLERK_CONTENT_SECURITY_POLICY.strict, true);
+  assert.deepEqual(CLERK_CONTENT_SECURITY_POLICY.directives["object-src"], ["'none'"]);
+  assert.deepEqual(CLERK_CONTENT_SECURITY_POLICY.directives["frame-ancestors"], ["'none'"]);
 });
 
 test("sitemap includes every public trust page", () => {

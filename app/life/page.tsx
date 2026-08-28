@@ -1,9 +1,7 @@
-import { getServerSession } from "next-auth";
-import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { LifeCommandCenter } from "@/components/life/LifeCommandCenter";
-import { authOptions, developmentAuthBypassEnabled, isAllowedEmail } from "@/lib/auth-options";
 import { getLifeCommandData } from "@/lib/life-command";
+import { requirePrivatePageAccess } from "@/lib/private-access";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -12,11 +10,6 @@ export const metadata: Metadata = {
 };
 
 export default async function LifePage() {
-  const bypass = developmentAuthBypassEnabled();
-  if (!bypass) {
-    const session = await getServerSession(authOptions);
-    if (!isAllowedEmail(session?.user?.email)) redirect("/signin?callbackUrl=/life");
-  }
-
-  return <LifeCommandCenter initialData={await getLifeCommandData()} />;
+  const authMode = await requirePrivatePageAccess("/life");
+  return <LifeCommandCenter initialData={await getLifeCommandData()} authMode={authMode} />;
 }

@@ -1,6 +1,5 @@
-import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
-import { authOptions, developmentAuthBypassEnabled, isAllowedEmail } from "@/lib/auth-options";
+import { developmentAuthBypassEnabled } from "@/lib/auth-policy";
 import {
   getLifeCommandData,
   LifeStateConflictError,
@@ -15,20 +14,16 @@ import {
   toggleQuestCompletion,
 } from "@/lib/life-state-actions";
 import { getLifeAgentCapability } from "@/lib/local-life-agent";
+import { privateApiDenial } from "@/lib/private-access";
 import { secretHeaderMatches, trustedSameOriginJsonMutation } from "@/lib/request-security";
 
 export const dynamic = "force-dynamic";
 
 class QuestNotFoundError extends Error {}
 
-async function authorized(): Promise<boolean> {
-  if (developmentAuthBypassEnabled()) return true;
-  const session = await getServerSession(authOptions);
-  return isAllowedEmail(session?.user?.email);
-}
-
 export async function GET() {
-  if (!(await authorized())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const denial = await privateApiDenial();
+  if (denial) return denial;
   try {
     return NextResponse.json(await getLifeCommandData());
   } catch (cause) {
@@ -40,7 +35,8 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  if (!(await authorized())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const denial = await privateApiDenial();
+  if (denial) return denial;
   const trustedRequest = trustedSameOriginJsonMutation(req)
     && (!developmentAuthBypassEnabled()
       || secretHeaderMatches(req.headers.get("x-life-agent-capability"), getLifeAgentCapability()));

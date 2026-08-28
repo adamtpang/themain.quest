@@ -19,6 +19,8 @@ The authenticated `/life` route includes:
 - exactly one current quest, selected from the open outbox by inaction cost and then strategic tier
 - a clear `Done means` goal and one concrete `Do this now` action
 - a 2, 5, 10, or 25-minute count-up stopwatch with immediate progress feedback
+- a visible four-step loop: enter, act, prove, and return
+- optional procedural sound cues for focus, timebox completion, shrinking, skipping, quest completion, and level-up, with a persistent mute control
 - `Too hard? Make it smaller`, which asks the local AI agent for a sub-two-minute physical action while preserving the original goal
 - a safe deterministic fallback when the local AI agent is unavailable
 - `Skip and explain why`, which preserves the quest, records the reason, and advances to the next open quest
@@ -40,18 +42,19 @@ Marketing multipliers are not treated as scientific facts. The product uses the 
 
 ## Authentication setup
 
-1. Create a Google OAuth web application.
-2. Add these authorized redirect URIs:
-   - `http://localhost:3000/api/auth/callback/google`
-   - `https://themain.quest/api/auth/callback/google`
-3. Copy `.env.example` to `.env.local`.
-4. Set `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `NEXTAUTH_SECRET`, `NEXTAUTH_URL`, and `AUTH_ALLOWED_EMAIL`.
-5. Set `DATABASE_URL` to the Neon database used by the app.
-6. Optionally set `OBSIDIAN_VAULT_PATH`. Local development otherwise uses `%USERPROFILE%\ObsidianVault`.
-7. Keep `LIFE_LOCAL_AGENT_ENABLED=true` to enable the local Process and AI shrink actions.
-8. Optionally set `CLAUDE_CLI_PATH`, `LIFE_LOCAL_AGENT_MODEL`, or `PROCESS_SKILL_PATH`. The defaults use `claude`, `sonnet`, and the Process skill under the current user profile.
+1. Create a Clerk application with development and production instances.
+2. In Clerk, use Restricted sign-up mode and add the exact owner email to the allowlist.
+3. Enable Google under Clerk SSO connections. Development may use Clerk's shared OAuth credentials. Production must use a production Google OAuth client configured inside Clerk.
+4. Copy `.env.example` to `.env.local`.
+5. Set `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY`, and `AUTH_ALLOWED_EMAIL`. Use test keys locally and live keys only in production.
+6. Set `DATABASE_URL` to the Neon database used by the app.
+7. Optionally set `OBSIDIAN_VAULT_PATH`. Local development otherwise uses `%USERPROFILE%\ObsidianVault`.
+8. Keep `LIFE_LOCAL_AGENT_ENABLED=true` to enable the local Process and AI shrink actions.
+9. Optionally set `CLAUDE_CLI_PATH`, `LIFE_LOCAL_AGENT_MODEL`, or `PROCESS_SKILL_PATH`. The defaults use `claude`, `sonnet`, and the Process skill under the current user profile.
 
 `AUTH_DEV_BYPASS=true` is only for local visual verification. The code ignores it in production.
+
+Clerk handles identity and signed sessions. The app separately checks every private page and data API against `AUTH_ALLOWED_EMAIL`, so a broader Clerk configuration cannot expose the private command center.
 
 `ANTHROPIC_API_KEY` is not required or supported by the private quest runner.
 
@@ -77,7 +80,7 @@ Use `npm run verify:ui` for the rendered public and private surfaces. Use `npm r
 - Next.js 16 App Router
 - React 19 and TypeScript
 - Tailwind CSS and shadcn/ui primitives
-- Auth.js through `next-auth` Google OAuth
+- Clerk sessions with Google OAuth and a server-side owner email allowlist
 - Neon Postgres for cross-device state
 - local Claude CLI subscription bridge for Process and adaptive shrinking
 - Vercel Analytics

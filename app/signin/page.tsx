@@ -1,7 +1,9 @@
+import { SignOutButton } from "@clerk/nextjs";
 import { LockKeyhole, ShieldCheck, Sparkles } from "lucide-react";
 import type { Metadata } from "next";
 import { SignInButton } from "@/components/auth/SignInButton";
-import { developmentAuthBypassEnabled } from "@/lib/auth-options";
+import { Button } from "@/components/ui/button";
+import { clerkConfigured, developmentAuthBypassEnabled } from "@/lib/auth-policy";
 
 export const metadata: Metadata = {
   title: "Private Sign In | The Main Quest",
@@ -11,10 +13,13 @@ export const metadata: Metadata = {
 export default async function SignInPage({
   searchParams,
 }: {
-  searchParams: Promise<{ callbackUrl?: string }>;
+  searchParams: Promise<{ callbackUrl?: string; reason?: string }>;
 }) {
   const params = await searchParams;
   const localPreview = developmentAuthBypassEnabled();
+  const clerkReady = clerkConfigured();
+  const setupMissing = params.reason === "not-configured" || (!localPreview && !clerkReady);
+  const wrongIdentity = params.reason === "not-allowed";
   return (
     <main className="flex min-h-screen items-center justify-center bg-brand-bg px-5 py-12">
       <div className="quest-card grid w-full max-w-5xl overflow-hidden border-ink bg-card lg:grid-cols-[1.1fr_0.9fr]">
@@ -44,14 +49,26 @@ export default async function SignInPage({
             <h2 className="mt-5 text-3xl font-semibold tracking-tight">Welcome back</h2>
             <p className="mt-3 text-base leading-7 text-muted-foreground">
               {localPreview
-                ? "Local preview access is enabled on this machine. Production still requires the single approved Google account."
-                : "Sign in with the single approved Google account to open your vault-backed life dashboard."}
+                ? "Local preview access is enabled on this machine. Production still requires the single approved Google account through Clerk."
+                : setupMissing
+                  ? "Clerk owner access is not configured yet. Add the production Clerk keys, enable Google, and allow the approved email before opening the private dashboard."
+                  : wrongIdentity
+                    ? "That identity is signed in, but it is not the approved owner account."
+                    : "Sign in with the single approved Google account through Clerk to open your vault-backed life dashboard."}
             </p>
             <div className="mt-8">
-              <SignInButton callbackUrl={params.callbackUrl} localPreview={localPreview} />
+              {wrongIdentity && clerkReady ? (
+                <SignOutButton redirectUrl="/signin">
+                  <Button size="lg" className="quest-button h-12 w-full bg-primary text-base text-primary-foreground hover:bg-primary/90">
+                    Sign out and use the approved Google account
+                  </Button>
+                </SignOutButton>
+              ) : (
+                <SignInButton callbackUrl={params.callbackUrl} localPreview={localPreview} clerkReady={clerkReady} />
+              )}
             </div>
             <div className="mt-8 grid gap-3 text-base text-muted-foreground">
-              <div className="flex gap-3"><ShieldCheck className="mt-0.5 h-4 w-4 text-primary" /><span>Email allowlist plus signed server sessions.</span></div>
+              <div className="flex gap-3"><ShieldCheck className="mt-0.5 h-4 w-4 text-primary" /><span>Clerk sessions plus a server-side email allowlist.</span></div>
               <div className="flex gap-3"><Sparkles className="mt-0.5 h-4 w-4 text-stream" /><span>Live quests, XP, and private progress data.</span></div>
             </div>
           </div>

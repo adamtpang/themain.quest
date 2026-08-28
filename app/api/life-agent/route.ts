@@ -1,6 +1,4 @@
-import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
-import { authOptions, developmentAuthBypassEnabled, isAllowedEmail } from "@/lib/auth-options";
 import { getLifeCommandData, LifeStateUnavailableError, readSharedState, updateSharedState } from "@/lib/life-command";
 import { recordChallengeAdjustment } from "@/lib/life-state-actions";
 import {
@@ -10,36 +8,16 @@ import {
   makeAdaptiveMove,
   startProcessJob,
 } from "@/lib/local-life-agent";
-import { secretHeaderMatches, trustedSameOriginJsonMutation } from "@/lib/request-security";
+import { localRequest, trustedLocalMutation } from "@/lib/local-request-security";
+import { privateApiDenial } from "@/lib/private-access";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 export const maxDuration = 90;
 
-async function authorized(): Promise<boolean> {
-  if (developmentAuthBypassEnabled()) return true;
-  const session = await getServerSession(authOptions);
-  return isAllowedEmail(session?.user?.email);
-}
-
-function localRequest(request: NextRequest): boolean {
-  const forwardedHost = request.headers.get("x-forwarded-host")?.split(",", 1)[0]?.trim();
-  const host = forwardedHost || request.headers.get("host") || request.nextUrl.host;
-  try {
-    return ["localhost", "127.0.0.1", "::1"].includes(new URL(`http://${host}`).hostname);
-  } catch {
-    return false;
-  }
-}
-
-export function trustedLocalMutation(request: NextRequest, expectedCapability: string): boolean {
-  return localRequest(request)
-    && trustedSameOriginJsonMutation(request)
-    && secretHeaderMatches(request.headers.get("x-life-agent-capability"), expectedCapability);
-}
-
 export async function GET(request: NextRequest) {
-  if (!(await authorized())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const denial = await privateApiDenial();
+  if (denial) return denial;
   if (!localRequest(request) || !localLifeAgentEnabled()) {
     return NextResponse.json(getLifeAgentJobStatus());
   }
@@ -50,7 +28,8 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  if (!(await authorized())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const denial = await privateApiDenial();
+  if (denial) return denial;
   if (!trustedLocalMutation(request, getLifeAgentCapability()) || !localLifeAgentEnabled()) {
     return NextResponse.json({ error: "The agent bridge runs only on the owner's local machine" }, { status: 503 });
   }

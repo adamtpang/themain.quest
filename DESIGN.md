@@ -75,8 +75,8 @@ Sources include [FlowState's pillars](https://www.flowstate.com/flow/pillars), t
 
 ## Privacy model
 
-- `/life`, `/money-os`, and their state APIs require a signed Auth.js session.
-- Only the email in `AUTH_ALLOWED_EMAIL` may sign in.
+- `/life`, `/money-os`, and their state APIs require a signed Clerk session.
+- Clerk handles Google identity. Only the email in `AUTH_ALLOWED_EMAIL` may access private pages or APIs.
 - Raw Obsidian Markdown is read only on the server in local development.
 - The browser receives only parsed day-scoped quest and game-state fields, never raw Markdown, broader life notes, or absolute vault paths.
 - Production reads a parsed Neon snapshot, not the local filesystem.
@@ -110,7 +110,7 @@ Verified on 2026-08-28 with a production build, rendered browser audits at 1440 
 
 Screenshots are stored outside the repository in the local Codex visualizations directory.
 
-The real Google OAuth handshake, production environment variables, Neon production access, and Vercel deployment still require owner configuration and were not claimed as verified. A full Process pass was intentionally not triggered during UI verification because it can legitimately reorganize the live outbox. The Claude CLI subscription handshake and fixed-purpose bridge were verified separately.
+The real Clerk Google OAuth handshake requires the owner to create the Clerk production instance, add the approved email, configure Google's production credentials in Clerk, and place Clerk's live keys in Vercel. A full Process pass was intentionally not triggered during UI verification because it can legitimately reorganize the live outbox. The Claude CLI subscription handshake and fixed-purpose bridge were verified separately.
 
 The public landing overhaul was also verified on 2026-08-28 against the optimized production server:
 

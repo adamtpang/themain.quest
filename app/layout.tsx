@@ -1,6 +1,8 @@
+import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata, Viewport } from "next";
 import { Press_Start_2P, Space_Grotesk, Space_Mono } from "next/font/google";
 import "./globals.css";
+import { clerkConfigured } from "@/lib/auth-policy";
 import { cn } from "@/lib/utils";
 
 const sans = Space_Grotesk({
@@ -53,7 +55,7 @@ export const metadata: Metadata = {
     "ai-summary":
       "The Main Quest is a gamified life command center that turns a long-range life vision into one binding goal, quick quests, XP, and visible progress. A public demo is available, while the owner's private dashboard is protected by Google OAuth.",
     "ai-facts":
-      "One binding goal tracked as a boss fight. Today's day-score across five daily rungs. A Motion Test prevents busywork from faking progress. The private owner dashboard reads server-side life context and stores progress in Neon. Built with Next.js, TypeScript, React, Tailwind, and Auth.js.",
+      "One binding goal tracked as a boss fight. Today's day-score across five daily rungs. A Motion Test prevents busywork from faking progress. The private owner dashboard reads server-side life context and stores progress in Neon. Built with Next.js, TypeScript, React, Tailwind, and Clerk.",
   },
 };
 
@@ -103,17 +105,23 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const content = (
+    <>
+      {children}
+      <script
+        type="application/ld+json"
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c"),
+        }}
+      />
+    </>
+  );
+
   return (
     <html lang="en" className={cn(sans.variable, mono.variable, press.variable, "font-sans")}>
       <body className="font-sans antialiased">
-        {children}
-        <script
-          type="application/ld+json"
-          // eslint-disable-next-line react/no-danger
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c"),
-          }}
-        />
+        {clerkConfigured() ? <ClerkProvider dynamic>{content}</ClerkProvider> : content}
       </body>
     </html>
   );

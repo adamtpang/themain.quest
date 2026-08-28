@@ -1,41 +1,55 @@
-import { getToken } from "next-auth/jwt";
-import { NextRequest, NextResponse } from "next/server";
-import { developmentAuthBypassEnabled } from "@/lib/auth-options";
+import { clerkMiddleware } from "@clerk/nextjs/server";
+import type { NextFetchEvent, NextRequest } from "next/server";
+import { NextResponse } from "next/server";
+import {
+  clerkConfigured,
+  developmentAuthBypassEnabled,
+  unconfiguredRouteDecision,
+} from "@/lib/auth-policy";
+import {
+  BASELINE_CONTENT_SECURITY_POLICY,
+  CLERK_CONTENT_SECURITY_POLICY,
+  baselineContentSecurityPolicy,
+} from "@/lib/security-headers";
 
-const PAGE_PREFIXES = ["/life", "/money-os"];
-const API_PREFIXES = ["/api/life-state", "/api/money-os-state"];
+const configuredClerkProxy = clerkMiddleware({
+  contentSecurityPolicy: CLERK_CONTENT_SECURITY_POLICY,
+});
 
-export async function proxy(req: NextRequest) {
-  const { pathname } = req.nextUrl;
-  const isApi = API_PREFIXES.some((prefix) => pathname.startsWith(prefix));
-  const isPage = PAGE_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+function baselineResponse(): NextResponse {
+  const response = NextResponse.next();
+  response.headers.set(
+    "Content-Security-Policy",
+    process.env.NODE_ENV === "development"
+      ? baselineContentSecurityPolicy(true)
+      : BASELINE_CONTENT_SECURITY_POLICY,
+  );
+  return response;
+}
 
-  if (!isApi && !isPage) return NextResponse.next();
+export default function proxy(request: NextRequest, event: NextFetchEvent) {
+  if (developmentAuthBypassEnabled()) return baselineResponse();
 
-  if (developmentAuthBypassEnabled()) {
-    return NextResponse.next();
+  if (!clerkConfigured()) {
+    const decision = unconfiguredRouteDecision(request.nextUrl.pathname);
+    if (decision.action === "reject") {
+      return NextResponse.json({ error: "Owner authentication is not configured" }, { status: 503 });
+    }
+    if (decision.action === "redirect") {
+      const signInUrl = new URL("/signin", request.url);
+      signInUrl.searchParams.set("callbackUrl", request.nextUrl.pathname);
+      signInUrl.searchParams.set("reason", "not-configured");
+      return NextResponse.redirect(signInUrl);
+    }
+    return baselineResponse();
   }
 
-  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
-  const allowed = (process.env.AUTH_ALLOWED_EMAIL ?? "").trim().toLowerCase();
-  const authorized = Boolean(allowed && token?.email?.toLowerCase() === allowed);
-
-  if (authorized) return NextResponse.next();
-
-  if (isApi) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const signInUrl = new URL("/signin", req.url);
-  signInUrl.searchParams.set("callbackUrl", pathname);
-  return NextResponse.redirect(signInUrl);
+  return configuredClerkProxy(request, event);
 }
 
 export const config = {
   matcher: [
-    "/life/:path*",
-    "/money-os/:path*",
-    "/api/life-state/:path*",
-    "/api/money-os-state/:path*",
+    "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
+    "/(api|trpc)(.*)",
   ],
 };

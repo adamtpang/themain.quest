@@ -1,13 +1,17 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { encode } from "next-auth/jwt";
 import { NextRequest } from "next/server";
-import { trustedLocalMutation } from "../app/api/life-agent/route";
 import { getLifeAgentJobStatus, startProcessJob } from "../lib/local-life-agent";
+import { trustedLocalMutation } from "../lib/local-request-security";
 import { safeAppCallback } from "../lib/safe-callback";
 import { trustedSameOriginJsonMutation } from "../lib/request-security";
-import { developmentAuthBypassEnabled, isAllowedEmail } from "../lib/auth-options";
-import { proxy } from "../proxy";
+import {
+  clerkConfigured,
+  developmentAuthBypassEnabled,
+  isAllowedEmail,
+  privateRouteKind,
+  unconfiguredRouteDecision,
+} from "../lib/auth-policy";
 
 function localRequest(headers: Record<string, string>, url = "http://127.0.0.1:3100/api/life-agent") {
   return new NextRequest(url, { method: "POST", headers: { host: new URL(url).host, ...headers } });
@@ -112,54 +116,30 @@ test("the development bypass is always ignored in production", () => {
   assert.equal(developmentAuthBypassEnabled({ NODE_ENV: "development", AUTH_DEV_BYPASS: "false" }), false);
 });
 
-test("production route enforcement redirects pages, rejects APIs, and accepts only the allowlisted token", async () => {
-  const previous = {
-    NODE_ENV: process.env.NODE_ENV,
-    AUTH_DEV_BYPASS: process.env.AUTH_DEV_BYPASS,
-    AUTH_ALLOWED_EMAIL: process.env.AUTH_ALLOWED_EMAIL,
-    NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
-    NEXTAUTH_URL: process.env.NEXTAUTH_URL,
-  };
-  const restore = (key: keyof typeof previous) => {
-    const value = previous[key];
-    if (value === undefined) Reflect.deleteProperty(process.env, key);
-    else Reflect.set(process.env, key, value);
-  };
+test("private route classification covers every protected resource", () => {
+  assert.equal(privateRouteKind("/life"), "page");
+  assert.equal(privateRouteKind("/life/today"), "page");
+  assert.equal(privateRouteKind("/money-os"), "page");
+  assert.equal(privateRouteKind("/api/life-state"), "api");
+  assert.equal(privateRouteKind("/api/life-agent"), "api");
+  assert.equal(privateRouteKind("/api/money-os-state"), "api");
+  assert.equal(privateRouteKind("/board"), null);
+  assert.equal(privateRouteKind("/api/finn"), null);
+});
 
-  try {
-    Reflect.set(process.env, "NODE_ENV", "production");
-    process.env.AUTH_DEV_BYPASS = "true";
-    process.env.AUTH_ALLOWED_EMAIL = "owner@example.com";
-    process.env.NEXTAUTH_SECRET = "test-only-secret";
-    process.env.NEXTAUTH_URL = "https://themain.quest";
+test("Clerk is ready only when both public and secret keys exist", () => {
+  assert.equal(clerkConfigured({
+    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "pk_test_example",
+    CLERK_SECRET_KEY: "sk_test_example",
+  }), true);
+  assert.equal(clerkConfigured({ NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "pk_test_example" }), false);
+  assert.equal(clerkConfigured({ CLERK_SECRET_KEY: "sk_test_example" }), false);
+});
 
-    const deniedPage = await proxy(new NextRequest("https://themain.quest/life"));
-    assert.equal(deniedPage.status, 307);
-    assert.match(deniedPage.headers.get("location") ?? "", /\/signin\?callbackUrl=%2Flife/);
-
-    const deniedApi = await proxy(new NextRequest("https://themain.quest/api/life-state"));
-    assert.equal(deniedApi.status, 401);
-
-    const wrongToken = await encode({ token: { email: "other@example.com" }, secret: "test-only-secret" });
-    const wrongRequest = new NextRequest("https://themain.quest/api/life-state", {
-      headers: { cookie: `__Secure-next-auth.session-token=${wrongToken}` },
-    });
-    assert.equal((await proxy(wrongRequest)).status, 401);
-
-    const allowedToken = await encode({ token: { email: "owner@example.com" }, secret: "test-only-secret" });
-    const allowedRequest = new NextRequest("https://themain.quest/life", {
-      headers: { cookie: `__Secure-next-auth.session-token=${allowedToken}` },
-    });
-    const allowedResponse = await proxy(allowedRequest);
-    assert.equal(allowedResponse.status, 200);
-    assert.equal(allowedResponse.headers.get("x-middleware-next"), "1");
-  } finally {
-    restore("NODE_ENV");
-    restore("AUTH_DEV_BYPASS");
-    restore("AUTH_ALLOWED_EMAIL");
-    restore("NEXTAUTH_SECRET");
-    restore("NEXTAUTH_URL");
-  }
+test("production routing fails closed when Clerk owner authentication is not configured", () => {
+  assert.deepEqual(unconfiguredRouteDecision("/life"), { action: "redirect", status: 307 });
+  assert.deepEqual(unconfiguredRouteDecision("/api/life-state"), { action: "reject", status: 503 });
+  assert.deepEqual(unconfiguredRouteDecision("/"), { action: "continue", status: 200 });
 });
 
 test("missing local paths return a durable unavailable job instead of a phantom running job", () => {

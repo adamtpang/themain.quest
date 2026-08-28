@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { neon } from "@neondatabase/serverless";
+import { privateApiDenial } from "@/lib/private-access";
 import { trustedSameOriginJsonMutation } from "@/lib/request-security";
 
 const sql = neon(process.env.DATABASE_URL!);
 
 export async function GET() {
+  const denial = await privateApiDenial();
+  if (denial) return denial;
   const rows = await sql`
     SELECT key, value
     FROM money_os_state
@@ -27,6 +30,8 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  const denial = await privateApiDenial();
+  if (denial) return denial;
   if (!trustedSameOriginJsonMutation(req)) {
     return NextResponse.json({ error: "Untrusted mutation request" }, { status: 403 });
   }

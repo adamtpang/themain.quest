@@ -1,7 +1,8 @@
 "use client";
 
+import { SignOutButton } from "@clerk/nextjs";
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { signOut } from "next-auth/react";
 import {
   Brain,
   Check,
@@ -16,6 +17,8 @@ import {
   Sparkles,
   Sun,
   TimerReset,
+  Volume2,
+  VolumeX,
   X,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -32,6 +35,16 @@ import {
 } from "@/components/ui/sheet";
 import type { LifeCommandData, LifeQuest } from "@/lib/life-command-types";
 import type { LifeAgentJobStatus } from "@/lib/local-life-agent";
+import {
+  sfxAttack,
+  sfxLevelUp,
+  sfxLoadMutePreference,
+  sfxQuestComplete,
+  sfxSetMuted,
+  sfxShrink,
+  sfxSkip,
+  sfxTimeboxComplete,
+} from "@/lib/sfx";
 import { cn } from "@/lib/utils";
 
 const timeboxOptions = [2, 5, 10, 25] as const;
@@ -93,7 +106,13 @@ function initialMove(quest: LifeQuest): AdaptiveMove {
   };
 }
 
-export function LifeCommandCenter({ initialData }: { initialData: LifeCommandData }) {
+export function LifeCommandCenter({
+  initialData,
+  authMode,
+}: {
+  initialData: LifeCommandData;
+  authMode: "clerk" | "dev-bypass";
+}) {
   const [data, setData] = useState(initialData);
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [focusSeconds, setFocusSeconds] = useState(0);
@@ -105,6 +124,7 @@ export function LifeCommandCenter({ initialData }: { initialData: LifeCommandDat
   const [skipOpen, setSkipOpen] = useState(false);
   const [skipReason, setSkipReason] = useState("");
   const [processStatus, setProcessStatus] = useState<LifeAgentJobStatus | null>(null);
+  const [soundMuted, setSoundMuted] = useState(false);
   const [flash, setFlash] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -117,6 +137,12 @@ export function LifeCommandCenter({ initialData }: { initialData: LifeCommandDat
   const processUnavailable = processStatus?.state === "unavailable";
   const processRunning = processStatus?.state === "running";
   const processCapability = processStatus?.capability;
+  const loopStage = useMemo(() => {
+    if (!activeQuest || flash?.startsWith("+")) return 3;
+    if (focusSeconds === 0) return 0;
+    if (focusRunning) return 1;
+    return 2;
+  }, [activeQuest, flash, focusRunning, focusSeconds]);
 
   const flowState = useMemo(() => {
     if (!activeQuest) return "clear";
@@ -134,6 +160,7 @@ export function LifeCommandCenter({ initialData }: { initialData: LifeCommandDat
     if (timeboxOptions.some((minutes) => minutes === savedTimebox)) {
       setTimeboxMinutes(savedTimebox as (typeof timeboxOptions)[number]);
     }
+    setSoundMuted(sfxLoadMutePreference());
     void fetch("/api/life-agent")
       .then((response) => response.json())
       .then((status: LifeAgentJobStatus) => setProcessStatus(status))
@@ -146,6 +173,7 @@ export function LifeCommandCenter({ initialData }: { initialData: LifeCommandDat
       setFocusSeconds((seconds) => {
         if (seconds + 1 >= focusLimitSeconds) {
           setFocusRunning(false);
+          sfxTimeboxComplete();
           setFlash("Timebox complete. Choose done, smaller, or another round.");
           window.setTimeout(() => setFlash(null), 2400);
           return focusLimitSeconds;
@@ -209,6 +237,19 @@ export function LifeCommandCenter({ initialData }: { initialData: LifeCommandDat
     setFocusSeconds(0);
   }
 
+  function toggleSound() {
+    setSoundMuted((current) => sfxSetMuted(!current));
+  }
+
+  function toggleFocus() {
+    if (focusRunning) {
+      setFocusRunning(false);
+      return;
+    }
+    sfxAttack();
+    setFocusRunning(true);
+  }
+
   async function runProcess() {
     if (processRunning || processUnavailable || !processCapability) return;
     setError(null);
@@ -247,6 +288,7 @@ export function LifeCommandCenter({ initialData }: { initialData: LifeCommandDat
         [activeQuest.id]: { ...payload.move, source: "ai" },
       }));
       setData(payload.data);
+      sfxShrink();
       showFlash("Challenge rebalanced");
     } catch (cause) {
       const fallback = builtInMove(activeQuest);
@@ -266,6 +308,7 @@ export function LifeCommandCenter({ initialData }: { initialData: LifeCommandDat
         const fallbackPayload = await fallbackResponse.json();
         if (!fallbackResponse.ok) throw new Error(fallbackPayload.error ?? "Learning could not be saved");
         setData(fallbackPayload.data);
+        sfxShrink();
         setError(`${cause instanceof Error ? cause.message : "AI is unavailable"}. A built-in smaller move was saved.`);
       } catch {
         setError(`${cause instanceof Error ? cause.message : "AI is unavailable"}. A temporary smaller move is ready, but learning was not saved.`);
@@ -290,6 +333,7 @@ export function LifeCommandCenter({ initialData }: { initialData: LifeCommandDat
       setData(payload.data);
       setSkipOpen(false);
       setSkipReason("");
+      sfxSkip();
       showFlash("Reason saved. The next quest is up.");
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "The quest could not be skipped");
@@ -316,9 +360,12 @@ export function LifeCommandCenter({ initialData }: { initialData: LifeCommandDat
       });
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error ?? "Progress could not be saved");
-      setData(payload.data);
+      const nextData = payload.data as LifeCommandData;
+      setData(nextData);
       setFocusRunning(false);
       setFocusSeconds(0);
+      if (nextData.level > data.level) sfxLevelUp();
+      else sfxQuestComplete();
       showFlash(`+${activeQuest.xp} XP. Next quest loaded.`);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Progress could not be saved");
@@ -357,15 +404,22 @@ export function LifeCommandCenter({ initialData }: { initialData: LifeCommandDat
             <Button variant="outline" size="icon" onClick={toggleTheme} aria-label="Toggle color theme">
               {theme === "light" ? <Moon /> : <Sun />}
             </Button>
-            <Button variant="ghost" size="icon" onClick={() => signOut({ callbackUrl: "/" })} aria-label="Sign out">
-              <LogOut />
+            <Button variant="outline" size="icon" onClick={toggleSound} aria-label={soundMuted ? "Turn sound on" : "Mute sound"} title={soundMuted ? "Turn sound on" : "Mute sound"}>
+              {soundMuted ? <VolumeX /> : <Volume2 />}
             </Button>
+            {authMode === "clerk" ? (
+              <SignOutButton redirectUrl="/">
+                <Button variant="ghost" size="icon" aria-label="Sign out"><LogOut /></Button>
+              </SignOutButton>
+            ) : (
+              <Button asChild variant="ghost" size="icon" aria-label="Exit local preview"><Link href="/"><LogOut /></Link></Button>
+            )}
           </div>
         </div>
       </header>
 
       <main className="relative z-10 mx-auto flex min-h-[calc(100vh-4rem)] max-w-5xl flex-col justify-center px-4 py-8 sm:px-6 sm:py-12">
-        {flash && <div className="quest-button fixed right-4 top-20 z-50 bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground">{flash}</div>}
+        {flash && <div aria-live="polite" className="quest-button fixed right-4 top-20 z-50 bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground">{flash}</div>}
         {error && (
           <div className="mx-auto mb-4 flex w-full max-w-3xl items-center justify-between rounded-2xl border-2 border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
             <span>{error}</span>
@@ -382,9 +436,19 @@ export function LifeCommandCenter({ initialData }: { initialData: LifeCommandDat
           <span className="rounded-full border-2 border-ink bg-gold px-3 py-1.5 text-ink">Level {data.level}</span>
           <span className="rounded-full border bg-card px-3 py-1.5"><span className="mr-1.5 text-gold">✦</span>{data.xp} XP</span>
           <span className="rounded-full border bg-card px-3 py-1.5"><span className="mr-1.5 text-primary">●</span>Day {data.todayScore}/10</span>
+          <span className="rounded-full border bg-card px-3 py-1.5"><span className="mr-1.5 text-grass">◆</span>{data.completedToday} cleared today</span>
           <span className="rounded-full border bg-card px-3 py-1.5"><span className="mr-1.5 text-primary">●</span>Clear goal</span>
           <span className="rounded-full border bg-card px-3 py-1.5"><span className="mr-1.5 text-sky">●</span>Immediate feedback</span>
           <span className="rounded-full border bg-card px-3 py-1.5"><span className="mr-1.5 text-gold">●</span>Challenge {flowState}</span>
+        </div>
+
+        <div className="mx-auto mb-4 grid w-full max-w-3xl grid-cols-4 overflow-hidden rounded-2xl border-2 bg-card/85 text-center shadow-sm" aria-label="Quest loop">
+          {["Enter", "Act", "Prove", "Return"].map((label, index) => (
+            <div key={label} className={cn("border-r px-2 py-2.5 last:border-r-0", loopStage === index && "bg-gold text-ink")}>
+              <p className="font-mono text-[9px] font-bold uppercase tracking-[0.14em]">{index + 1}</p>
+              <p className="mt-0.5 text-xs font-semibold">{label}</p>
+            </div>
+          ))}
         </div>
 
         <Card className="quest-card mx-auto w-full max-w-3xl overflow-hidden border-ink bg-ink text-paper dark:border-primary/30 dark:bg-card">
@@ -428,7 +492,7 @@ export function LifeCommandCenter({ initialData }: { initialData: LifeCommandDat
                   </div>
                   <Progress value={focusProgress} className="mt-4 h-2 bg-paper/10" />
                   <div className="mt-4 flex gap-2">
-                    <Button className="quest-button flex-1 bg-gold text-ink hover:bg-gold/90" onClick={() => setFocusRunning((running) => !running)}>
+                    <Button className="quest-button flex-1 bg-gold text-ink hover:bg-gold/90" onClick={toggleFocus}>
                       {focusRunning ? <><Clock3 /> Pause</> : <><Play /> Start {timeboxMinutes}m</>}
                     </Button>
                     <Button variant="outline" size="icon" className="rounded-full border-paper/20 bg-transparent text-paper hover:bg-paper/10 hover:text-paper" onClick={() => { setFocusRunning(false); setFocusSeconds(0); }} aria-label="Reset stopwatch"><TimerReset /></Button>

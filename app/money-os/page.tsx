@@ -82,6 +82,7 @@ export default function MoneyOSPage() {
             <div className="mt-3 flex flex-col gap-3 sm:flex-row">
               <input
                 id="payment"
+                name="payment"
                 type="number"
                 min="0"
                 step="0.01"
