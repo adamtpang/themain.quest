@@ -72,7 +72,9 @@ export function SiteNavbar() {
             <SheetHeader className="pr-8 text-left">
               <div className="flex h-11 w-11 -rotate-3 items-center justify-center rounded-[45%_55%] border-[3px] border-ink bg-gold font-pixel text-[9px] text-ink">MQ</div>
               <SheetTitle className="pt-3 text-2xl">Choose your doorway</SheetTitle>
-              <SheetDescription>Every real page in The Main Quest, in one place.</SheetDescription>
+              <SheetDescription>
+                The Main Quest navigation keeps the free public board, private owner tools, and public project information together so every destination stays easy to identify.
+              </SheetDescription>
             </SheetHeader>
             <div className="mt-6 grid gap-2">
               {navigation.map((item) => (

@@ -82,8 +82,11 @@ let browser;
 
   const startButton = page.getByRole("button", { name: /^Start \d+m$/ });
   await startButton.click();
-  await page.waitForTimeout(1200);
-  if (await page.getByText("00:00", { exact: true }).count()) throw new Error("Stopwatch did not advance");
+  await page.waitForFunction(
+    () => !document.body.innerText.includes("00:00"),
+    undefined,
+    { timeout: 5000 },
+  );
   await page.getByRole("button", { name: "Pause" }).click();
 
   await page.getByRole("button", { name: "Skip and explain why" }).click();

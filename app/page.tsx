@@ -31,21 +31,21 @@ const flowSignals = [
     icon: Compass,
     label: "Clear goal",
     title: "Know what done means",
-    copy: "Process turns the whole day into one concrete outcome and one physical starting move.",
+    copy: "The Process action turns a day-scoped outbox into one concrete outcome and one physical starting move, so the player can act without carrying the whole plan at once.",
     color: "bg-sky/45",
   },
   {
     icon: Clock3,
     label: "Immediate feedback",
     title: "See momentum now",
-    copy: "A bounded stopwatch, visible completion, and durable XP make progress impossible to miss.",
+    copy: "The runner offers 4 bounded timeboxes at 2, 5, 10, or 25 minutes, then makes completion and durable XP visible as soon as the real action is finished.",
     color: "bg-gold/55",
   },
   {
     icon: Minimize2,
     label: "Challenge balance",
     title: "Shrink, never shame",
-    copy: "If a quest feels too hard, AI reduces the next action without abandoning the real outcome.",
+    copy: "The challenge control makes an overwhelming quest smaller without deleting the original outcome, while a skipped quest stays preserved with the player's reason for later processing.",
     color: "bg-grass/35",
   },
 ];
@@ -103,8 +103,8 @@ export default function HomePage() {
             <div className="flex items-center gap-3 border-b-[3px] border-ink bg-card px-4 py-3 sm:px-6">
               <div className="flex h-10 w-10 -rotate-3 items-center justify-center rounded-[45%_55%] border-[3px] border-ink bg-gold font-pixel text-[8px] text-ink">MQ</div>
               <div className="min-w-0">
-                <p className="truncate text-sm font-semibold">The Main Quest</p>
-                <p className="truncate text-[11px] text-muted-foreground">One thing at a time</p>
+                <div className="truncate text-sm font-semibold">The Main Quest</div>
+                <div className="truncate text-[11px] text-muted-foreground">One thing at a time</div>
               </div>
               <div className="ml-auto flex items-center gap-2">
                 <span className="hidden rounded-full border-2 bg-secondary px-3 py-1.5 text-xs font-semibold text-muted-foreground sm:inline-flex"><Check className="mr-1 h-3.5 w-3.5 text-primary" />Live outbox</span>
@@ -130,21 +130,21 @@ export default function HomePage() {
 
                   <div className="mt-6 grid gap-3 sm:grid-cols-2">
                     <div className="rounded-2xl border-2 border-paper/10 bg-paper/[0.05] p-4">
-                      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-gold">Clear goal</p>
-                      <p className="mt-2 text-sm leading-6 text-paper/75">One useful outcome exists outside the app.</p>
+                      <div className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-gold">Clear goal</div>
+                      <div className="mt-2 text-sm leading-6 text-paper/75">One useful outcome exists outside the app.</div>
                     </div>
                     <div className="rounded-2xl border-2 border-sky/25 bg-sky/10 p-4">
-                      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-sky">Do this now</p>
-                      <p className="mt-2 text-lg font-semibold leading-7 text-paper">Open the source and look at the first unanswered line.</p>
-                      <p className="mt-2 text-xs leading-5 text-paper/50">This setup move is the whole win. You may stop after it.</p>
+                      <div className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-sky">Do this now</div>
+                      <div className="mt-2 text-lg font-semibold leading-7 text-paper">Open the source and look at the first unanswered line.</div>
+                      <div className="mt-2 text-xs leading-5 text-paper/50">The setup move is the whole win. Stopping after it is allowed.</div>
                     </div>
                   </div>
 
                   <div className="mt-5 rounded-[1.4rem_1rem_1.5rem_1.1rem] border-2 border-paper/15 bg-paper/[0.05] p-4">
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                       <div>
-                        <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-paper/45">Immediate feedback</p>
-                        <p className="mt-1 font-mono text-4xl font-semibold tabular-nums">00:00</p>
+                        <div className="font-mono text-[10px] uppercase tracking-[0.16em] text-paper/45">Immediate feedback</div>
+                        <div className="mt-1 font-mono text-4xl font-semibold tabular-nums">00:00</div>
                       </div>
                       <div className="grid grid-cols-4 gap-1">
                         {[2, 5, 10, 25].map((minutes) => <span key={minutes} className={`rounded-lg border px-2 py-1.5 font-mono text-[10px] ${minutes === 5 ? "border-gold bg-gold text-ink" : "border-paper/15 text-paper/50"}`}>{minutes}m</span>)}
@@ -169,15 +169,15 @@ export default function HomePage() {
       <section className="relative z-20 border-y-[4px] border-ink bg-card py-24" id="how-it-works">
         <div className="mx-auto max-w-7xl px-5 sm:px-8">
           <div className="mx-auto max-w-2xl text-center">
-            <p className="font-mono text-xs font-bold uppercase tracking-[0.18em] text-primary">Built for flow</p>
+            <div className="font-mono text-xs font-bold uppercase tracking-[0.18em] text-primary">Built for flow</div>
             <h2 className="mt-4 text-3xl font-semibold tracking-tight sm:text-5xl">Three signals. One honest loop.</h2>
-            <p className="mt-4 text-base leading-7 text-muted-foreground">The interface protects the conditions that make focused action easier, then gets out of the way.</p>
+            <p className="mt-4 text-base leading-7 text-muted-foreground">The Main Quest protects 3 practical flow signals: a clear goal, immediate feedback, and a challenge level that can be reduced when the next move feels too difficult.</p>
           </div>
           <div className="mt-12 grid gap-6 lg:grid-cols-3">
             {flowSignals.map((signal, index) => (
               <div key={signal.title} className={`quest-card bg-card p-6 ${index === 1 ? "lg:-translate-y-3" : ""}`}>
                 <div className={`flex h-12 w-12 -rotate-2 items-center justify-center rounded-[45%_55%] border-[3px] border-ink text-ink shadow-pix-sm ${signal.color}`}><signal.icon className="h-5 w-5" /></div>
-                <p className="mt-6 font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-primary">{signal.label}</p>
+                <div className="mt-6 font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-primary">{signal.label}</div>
                 <h3 className="mt-2 text-xl font-semibold tracking-tight">{signal.title}</h3>
                 <p className="mt-3 text-base leading-7 text-muted-foreground">{signal.copy}</p>
               </div>
@@ -191,7 +191,7 @@ export default function HomePage() {
           <div>
             <Badge variant="outline" className="rounded-full border-2 bg-card"><Orbit className="mr-1 h-3.5 w-3.5 text-stream" />Vision to action</Badge>
             <h2 className="mt-5 text-4xl font-semibold leading-tight tracking-tight sm:text-5xl">Zoom out until life feels meaningful. Zoom in until action feels easy.</h2>
-            <p className="mt-5 max-w-xl text-base leading-7 text-muted-foreground">The questbook keeps the long movie of your life in view. The outbox stays day-scoped. The runner reveals only the next useful frame.</p>
+            <p className="mt-5 max-w-xl text-base leading-7 text-muted-foreground">The questbook keeps the long movie of a life in view across 9 planning horizons, while the outbox stays day-scoped and the runner reveals only the next useful frame.</p>
             <div className="mt-7 flex flex-wrap gap-2">
               {horizons.map((horizon, index) => <span key={horizon} className={`rounded-full border-2 px-3 py-1.5 text-xs font-semibold ${index === horizons.length - 1 ? "border-ink bg-gold text-ink shadow-pix-sm" : "bg-card text-muted-foreground"}`}>{horizon}</span>)}
             </div>
@@ -202,10 +202,10 @@ export default function HomePage() {
             <div className="relative">
               <div className="flex items-center gap-3">
                 <div className="flex h-11 w-11 -rotate-3 items-center justify-center rounded-[45%_55%] border-[3px] border-paper/70 bg-gold text-ink"><LockKeyhole className="h-5 w-5" /></div>
-                <div><p className="font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-gold">Private world</p><p className="mt-1 text-sm text-paper/55">Built for player one</p></div>
+                <div><div className="font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-gold">Private world</div><div className="mt-1 text-sm text-paper/55">Built for player one</div></div>
               </div>
               <h3 className="mt-7 text-3xl font-semibold tracking-tight">Your context stays yours.</h3>
-              <p className="mt-4 text-base leading-7 text-paper/60">Private routes require the approved Google identity. Local development can read the Obsidian vault server-side. The browser receives only the parsed quest fields it needs.</p>
+              <p className="mt-4 text-base leading-7 text-paper/60">The private Life and Money OS routes require the approved Google identity. Local development reads the Obsidian vault on the server, and the browser receives only the parsed fields required for the current view.</p>
               <div className="mt-7 grid gap-3 sm:grid-cols-2">
                 {["Single-user OAuth gate", "Server-side vault parsing", "Durable progress ledger", "No public raw life notes"].map((item) => <div key={item} className="flex items-center gap-2 rounded-2xl border-2 border-paper/10 bg-paper/[0.05] p-3 text-sm text-paper/75"><CheckCircle2 className="h-4 w-4 shrink-0 text-grass" />{item}</div>)}
               </div>
@@ -217,8 +217,8 @@ export default function HomePage() {
       <section className="border-y-[4px] border-ink bg-sky/25 py-20" id="doorways">
         <div className="mx-auto max-w-7xl px-5 sm:px-8">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-            <div><p className="font-mono text-xs font-bold uppercase tracking-[0.18em] text-primary">Every route</p><h2 className="mt-3 text-3xl font-semibold tracking-tight sm:text-5xl">Choose your doorway.</h2></div>
-            <p className="max-w-md text-base leading-7 text-muted-foreground">The navbar keeps every real destination one tap away. These cards explain what lives behind each one.</p>
+            <div><div className="font-mono text-xs font-bold uppercase tracking-[0.18em] text-primary">Every route</div><h2 className="mt-3 text-3xl font-semibold tracking-tight sm:text-5xl">Choose your doorway.</h2></div>
+            <p className="max-w-md text-base leading-7 text-muted-foreground">The public navigation names 4 product doorways and keeps each real destination one tap away, while every private doorway remains protected by the same owner-only identity boundary.</p>
           </div>
           <div className="mt-10 grid gap-5 md:grid-cols-2">
             {doorways.map((doorway) => (
@@ -232,12 +232,34 @@ export default function HomePage() {
         </div>
       </section>
 
+      <section className="border-y-[4px] border-ink bg-gold/35 py-20" id="offer">
+        <div className="mx-auto grid max-w-7xl gap-8 px-5 sm:px-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
+          <div>
+            <div className="font-mono text-xs font-bold uppercase tracking-[0.18em] text-primary">A clear public offer</div>
+            <h2 className="mt-4 text-3xl font-semibold tracking-tight sm:text-5xl">Try the life game without opening a private life.</h2>
+            <p className="mt-5 max-w-2xl text-base leading-7 text-muted-foreground">The public Board is a free demonstration for people who want to test a gamified goal and quest system in their own browser. The private Life runner is owner-only and is not offered as a public subscription.</p>
+          </div>
+          <div className="quest-card bg-card p-6 sm:p-8">
+            <div className="font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-primary">Pricing and access</div>
+            <p className="mt-3 text-base leading-7 text-muted-foreground">Pricing is simple: the public Board demo is free. Builders who want to discuss adapting the approach can contact the operator, while private vault data and owner tools remain outside every public path.</p>
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+              <Button asChild size="lg" className="quest-button bg-primary text-primary-foreground hover:bg-primary/90">
+                <Link href="/board">Try the free public demo <Gamepad2 /></Link>
+              </Button>
+              <Button asChild variant="outline" size="lg" className="quest-button bg-card text-foreground hover:bg-secondary">
+                <Link href="/contact">Contact the operator <ArrowRight /></Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section className="mx-auto max-w-7xl px-5 py-24 sm:px-8">
         <div className="relative overflow-hidden rounded-[2.2rem_1.6rem_2.4rem_1.8rem] border-[4px] border-ink bg-ink px-6 py-16 text-center text-paper shadow-pix-lg sm:px-12">
           <div className="world-sun absolute -right-8 -top-10 h-28 w-28 opacity-30" />
           <Trophy className="mx-auto h-7 w-7 text-gold" />
           <h2 className="mx-auto mt-5 max-w-3xl text-3xl font-semibold tracking-tight sm:text-5xl">Keep the vision huge and the next move tiny.</h2>
-          <p className="mx-auto mt-4 max-w-xl text-sm leading-6 text-paper/60">A great life is built one honest, playable day at a time.</p>
+          <p className="mx-auto mt-4 max-w-xl text-sm leading-6 text-paper/60">The Main Quest keeps one honest, playable day connected to a much larger life vision, then asks for proof through one concrete action instead of more planning.</p>
           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Button asChild size="lg" className="quest-button h-12 bg-gold px-6 text-ink hover:bg-gold/90"><Link href="/life">Open Life <ArrowRight /></Link></Button>
             <Button asChild variant="outline" size="lg" className="quest-button h-12 border-paper/30 bg-transparent px-6 text-paper hover:bg-paper/10 hover:text-paper"><Link href="/board">Play first <Gamepad2 /></Link></Button>
@@ -247,13 +269,16 @@ export default function HomePage() {
 
       <footer className="border-t-[3px] border-border py-8">
         <div className="mx-auto flex max-w-7xl flex-col gap-5 px-5 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-8">
-          <div><p className="font-semibold text-foreground">The Main Quest</p><p className="mt-1">Built for one real life.</p></div>
+          <div><div className="font-semibold text-foreground">The Main Quest</div><div className="mt-1">Built for one real life.</div></div>
           <div className="flex flex-wrap gap-x-5 gap-y-2">
             <Link href="/" className="hover:text-foreground">Home</Link>
             <Link href="/life" className="hover:text-foreground">Life</Link>
             <Link href="/board" className="hover:text-foreground">Board</Link>
             <Link href="/money-os" className="hover:text-foreground">Money OS</Link>
             <Link href="/signin" className="hover:text-foreground">Sign in</Link>
+            <Link href="/about" className="hover:text-foreground">About</Link>
+            <Link href="/contact" className="hover:text-foreground">Contact</Link>
+            <Link href="/privacy" className="hover:text-foreground">Privacy</Link>
           </div>
         </div>
       </footer>

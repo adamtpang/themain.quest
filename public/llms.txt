@@ -1,11 +1,15 @@
-# themain.quest
+# The Main Quest
 
-the main quest is a gamified life RPG. It turns your one goal into a boss to beat, your days into XP, and your habits into daily quests, all on a single mobile-first screen. Every time you open it, the app surfaces the one binding goal that matters most, tracks today's day-score across five daily rungs, and runs a Motion Test on each quest so busywork cannot masquerade as progress. A life-left clock in the header counts your days remaining so time stays legible. It is built for productivity and self-improvement people who want to run their own life like a game. State lives in browser localStorage, with no account required, and it is built with Next.js, TypeScript, React, and Tailwind.
+The Main Quest is a gamified life command center operated by adam.inc. The public site explains how a long-range life vision becomes one day-scoped next quest with a clear goal, immediate feedback, a bounded stopwatch, and a control that can shrink an overwhelming action.
 
-## Pricing
-Founding lifetime license $29: https://buy.stripe.com/9B69ATgvw68B9As0m5aMU0D
+## Public pages
 
-## Links
-Site: https://themain.quest
-More from adam.inc (43 products, one menu): https://adam.gives
-Built by Adam Pang: https://adampang.com
+- Home: https://themain.quest/
+- Free public Board demo: https://themain.quest/board
+- About: https://themain.quest/about
+- Contact: https://themain.quest/contact
+- Privacy: https://themain.quest/privacy
+
+## Access boundary
+
+The public Board is free to try and stores demonstration state in the visitor's browser. The Life and Money OS routes are private owner tools protected by an approved Google identity. Public HTML and client bundles must not include raw vault notes, private finances, calendar events, or complete task data.

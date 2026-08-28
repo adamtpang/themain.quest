@@ -34,7 +34,7 @@ export const metadata: Metadata = {
   title: TITLE,
   description: DESCRIPTION,
   alternates: {
-    canonical: "/",
+    canonical: SITE_URL,
   },
   openGraph: {
     type: "website",
@@ -65,9 +65,6 @@ export const viewport: Viewport = {
   themeColor: "#9bd9ff",
 };
 
-// Structured data for bots: an Organization node (adam.inc) publishing a
-// SoftwareApplication node (this app), with absolute @id/url on both so
-// crawlers can ground the entity instead of guessing from prose alone.
 const jsonLd = {
   "@context": "https://schema.org",
   "@graph": [
@@ -79,19 +76,23 @@ const jsonLd = {
       sameAs: ["https://adampang.com", "https://adam.gives"],
     },
     {
-      "@type": "SoftwareApplication",
-      "@id": `${SITE_URL}/#app`,
+      "@type": "WebSite",
+      "@id": `${SITE_URL}/#website`,
       name: "The Main Quest",
       url: SITE_URL,
       description: DESCRIPTION,
+      publisher: { "@id": `${SITE_URL}/#organization` },
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": `${SITE_URL}/board/#app`,
+      name: "The Main Quest public board",
+      url: `${SITE_URL}/board`,
+      description:
+        "A free public demonstration of The Main Quest's gamified goal and quest board.",
       applicationCategory: "LifestyleApplication",
       operatingSystem: "Web",
-      offers: {
-        "@type": "Offer",
-        price: "29",
-        priceCurrency: "USD",
-        url: "https://buy.stripe.com/9B69ATgvw68B9As0m5aMU0D",
-      },
+      isAccessibleForFree: true,
       publisher: { "@id": `${SITE_URL}/#organization` },
       author: { "@id": `${SITE_URL}/#organization` },
     },
@@ -110,7 +111,9 @@ export default function RootLayout({
         <script
           type="application/ld+json"
           // eslint-disable-next-line react/no-danger
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c"),
+          }}
         />
         {process.env.VERCEL ? <Analytics /> : null}
       </body>
