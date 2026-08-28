@@ -5,7 +5,10 @@ const baseUrl = process.env.UI_BASE_URL || "http://localhost:3100";
 let browser;
 
 (async () => {
-  browser = await chromium.launch({ headless: true });
+  browser = await chromium.launch({
+    executablePath: process.env.BROWSER_EXECUTABLE || chromium.executablePath(),
+    headless: true,
+  });
   const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
   const errors = [];
   page.on("console", (message) => {

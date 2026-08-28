@@ -59,7 +59,7 @@ The landing-page information architecture takes one structural cue from Tailark:
 - The host validates task preservation, Markdown-only changes, a playable day queue, and concurrent live edits before applying files. Durable local journals and original-file backups make interrupted multi-file runs recoverable. A pending journal retries snapshot synchronization on the next vault Process run. Successful synchronization then clears only the temporary skipped set.
 - Process preserves every capture and follows the outbox's day-only contract. It never sends, posts, publishes, buys, or communicates externally.
 - The three flow signals stay visible: clear goal, immediate feedback, and challenge ready or rebalanced.
-- Failed writes roll back optimistic UI and show a visible error.
+- Failed durable writes show a visible error. Completion and skip writes leave the prior durable state intact. A built-in smaller move may remain temporarily even when its learning event could not be saved.
 
 ## Flow research basis
 
@@ -84,7 +84,7 @@ Sources include [FlowState's pillars](https://www.flowstate.com/flow/pillars), t
 - The development server binds to `127.0.0.1`, and the local agent receives a minimal child-process environment.
 - The bridge uses fixed Process and shrink operations. There is no arbitrary prompt or shell endpoint.
 - The Process agent receives file-only tools, safe mode, no browser integration, and an empty strict MCP configuration.
-- State mutations require same-origin JSON. Local bypass mutations also require the ephemeral agent capability.
+- Every mutation requires same-origin JSON. Local agent mutations also require the ephemeral agent capability.
 - Neon progress writes use optimistic revisions with conflict retries. Invalid or unavailable reads fail closed.
 - No API key is required. The bridge uses the local subscription-authenticated CLI.
 - `/life` and `/signin` are marked `noindex`.
@@ -101,8 +101,8 @@ Verified on 2026-08-28 with a production build, rendered browser audits at 1440 
 - one current quest visible: pass
 - stopwatch start and progress: pass
 - skip reason sheet without data mutation: pass
-- adaptive shrink response and two-minute selection: pass
-- Process vault control present and local agent handshake: pass
+- adaptive shrink response and two-minute selection with a mocked AI response: pass
+- Process vault control, local capability handshake, polling, and refresh with mocked completion: pass
 - light and dark body contrast: AA
 - card descriptions, labels, values, and primary buttons: AA
 - unauthenticated `/life` and `/money-os`: redirect to sign-in
@@ -123,3 +123,11 @@ The public landing overhaul was also verified on 2026-08-28 against the optimize
 - TypeScript and Next.js production build: pass
 
 Landing screenshots are stored outside the repository in the local Codex visualizations directory.
+
+## Browser verification environment
+
+- `UI_BASE_URL` selects the server under test and defaults to `http://127.0.0.1:3100` or `http://localhost:3100`, depending on the script.
+- `BROWSER_EXECUTABLE` overrides the Playwright Chromium executable.
+- `BEAUTIFY_VERIFY_SCRIPT` overrides the rendered-page audit helper.
+- `UI_OUTPUT_DIR` selects the screenshot output directory.
+- `npm run verify:life` runs unit tests, the mocked quest-loop interaction check, and the rendered landing check.

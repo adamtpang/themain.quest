@@ -16,7 +16,7 @@ The private runner is intentionally narrower than a dashboard. It shows one goal
 
 The authenticated `/life` route includes:
 
-- exactly one current quest, selected from the open outbox by tier, priority, and inaction cost
+- exactly one current quest, selected from the open outbox by inaction cost and then strategic tier
 - a clear `Done means` goal and one concrete `Do this now` action
 - a 2, 5, 10, or 25-minute count-up stopwatch with immediate progress feedback
 - `Too hard? Make it smaller`, which asks the local AI agent for a sub-two-minute physical action while preserving the original goal
@@ -28,7 +28,9 @@ The authenticated `/life` route includes:
 
 In local development, the server reads only `🐆 outbox.md` from the configured Obsidian vault. The browser receives only parsed day-scoped quest and game-state fields. Tier 1 is the highest strategic tier. Quest instances are scoped to the current day so a recurring task does not inherit yesterday's completion. The local `Process` and AI shrink actions use the owner's authenticated Claude CLI subscription, not an API key. They are fixed-purpose server actions and cannot execute arbitrary browser-supplied commands.
 
-Process edits an isolated copy of the vault with file-only tools. This dashboard action is deliberately vault-only. It does not fetch a live calendar or route work into external Aether repositories. Run the full `$process` workflow in Codex when calendar ingestion or project routing is required. The server rejects deletions, lost task captures, non-Markdown changes, invalid day queues, concurrent live edits, and disallowed punctuation before it applies validated files to the live vault. Each applied run keeps a durable local recovery journal and the original changed files under `.tmq-process-backups`. Interrupted runs are rolled back before another Process run begins. If vault changes commit before the Neon snapshot succeeds, the journal remains pending and the next vault Process run retries synchronization. Every successful user-triggered run then stores the minimal parsed private snapshot and progress ledger in Neon so the deployed dashboard can display the latest synchronized state without direct filesystem access. Neon writes use optimistic revisions and retries so concurrent actions cannot silently overwrite one another, while read failures stop mutations instead of becoming empty progress. Vercel cannot reach the private vault or local Claude CLI, so `Process vault` and AI shrink are local-desktop capabilities. The deployed experience keeps the protected snapshot, completion, skip, and built-in shrink behavior. All state mutations require same-origin JSON. Local bypass mutations also require an ephemeral high-entropy capability.
+Process edits an isolated copy of the vault with file-only tools. This dashboard action is deliberately vault-only. It does not fetch a live calendar or route work into external Aether repositories. Run the full `$process` workflow in Codex when calendar ingestion or project routing is required. The server rejects deletions, lost task captures, non-Markdown changes, invalid day queues, concurrent live edits, and disallowed punctuation before it applies validated files to the live vault. Each applied run keeps a durable local recovery journal and the original changed files under `.tmq-process-backups`. Interrupted runs are rolled back before another Process run begins. If vault changes commit before the Neon snapshot succeeds, the journal remains pending and the next vault Process run retries synchronization. Every successful user-triggered run then stores the minimal parsed private snapshot and progress ledger in Neon so the deployed dashboard can display the latest synchronized state without direct filesystem access. Neon writes use optimistic revisions and retries so concurrent actions cannot silently overwrite one another, while read failures stop mutations instead of becoming empty progress. Vercel cannot reach the private vault or local Claude CLI, so `Process vault` and AI shrink are local-desktop capabilities. The deployed experience keeps the protected snapshot, completion, skip, and built-in shrink behavior. Every mutation requires same-origin JSON. Local agent mutations also require an ephemeral high-entropy capability.
+
+When neither a local vault nor a synchronized Neon snapshot is available, `/life` presents three clearly labeled starter quests so the interaction remains understandable without pretending they came from the owner.
 
 ## Flow design basis
 
@@ -47,7 +49,7 @@ Marketing multipliers are not treated as scientific facts. The product uses the 
 5. Set `DATABASE_URL` to the Neon database used by the app.
 6. Optionally set `OBSIDIAN_VAULT_PATH`. Local development otherwise uses `%USERPROFILE%\ObsidianVault`.
 7. Keep `LIFE_LOCAL_AGENT_ENABLED=true` to enable the local Process and AI shrink actions.
-8. Optionally set `CLAUDE_CLI_PATH` or `LIFE_LOCAL_AGENT_MODEL`. The defaults use `claude` and `sonnet`.
+8. Optionally set `CLAUDE_CLI_PATH`, `LIFE_LOCAL_AGENT_MODEL`, or `PROCESS_SKILL_PATH`. The defaults use `claude`, `sonnet`, and the Process skill under the current user profile.
 
 `AUTH_DEV_BYPASS=true` is only for local visual verification. The code ignores it in production.
 
@@ -62,7 +64,13 @@ npm run lint
 npm run build
 ```
 
-The rendered UI verifier is available as `npm run verify:ui`. The interaction verifier is `node scripts/verify-life-quest-loop.cjs`. Both expect Playwright and a browser executable through the environment described in `DESIGN.md`.
+Use `npm run verify:ui` for the rendered public and private surfaces. Use `npm run verify:life` for unit tests plus the interaction and landing checks. The interaction check validates the browser loop with mocked AI and Process completions, so it never mutates the live vault. Verification defaults to Playwright Chromium and accepts `UI_BASE_URL`; rendered checks also accept `BROWSER_EXECUTABLE`, `BEAUTIFY_VERIFY_SCRIPT`, and `UI_OUTPUT_DIR`.
+
+## Private HTTP surfaces
+
+- `GET /api/life-state` returns the parsed quest and progress model. `POST` records completion, skips, and built-in adjustments.
+- `GET /api/life-agent` reports the local bridge status and capability. `POST` starts vault Process or requests an AI-reduced action on localhost only.
+- `/money-os/login` is a compatibility redirect to the shared `/signin` flow.
 
 ## Architecture
 
