@@ -49,7 +49,7 @@ export function defaultProblems(): Problem[] {
       title: "Visa / immigration paperwork open",
       importance: 5,
       urgency: 4,
-      why: "An unresolved visa is a hard deadline with legal teeth. It blocks location freedom and compounds if ignored. Mostly a few decisive sends (MDEC/IDI docs to Otavio), not a research project.",
+      why: "An unresolved visa is a hard deadline with legal teeth. It blocks location freedom and compounds if ignored. Mostly a few decisive document sends, not a research project.",
       beaten: false,
     },
     {

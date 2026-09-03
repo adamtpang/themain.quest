@@ -38,20 +38,16 @@ const MOTION_PATTERNS: RegExp[] = [
 
 const PRIORITY_PATTERNS: Array<{ p: Priority; re: RegExp }> = [
   { p: "Taxes", re: /\b(tax|taxes|irs|lhdn|accountant|filing|deduction|w-?9|1099)\b/i },
-  { p: "Visa", re: /\b(visa|mdec|sdec|idi|otavio|immigration|permit|passport|embassy|residen)/i },
+  { p: "Visa", re: /\b(visa|mdec|sdec|idi|immigration|permit|passport|embassy|residen)/i },
   { p: "Health", re: /\b(gym|run|running|lift|workout|exercise|train|training|swim|hike|walk|football|sleep|body|health|stretch|sauna|cardio|sweat)\b/i },
-  { p: "Life", re: /\b(call|text|message|reply|love|maanasa|mom|dad|mum|family|friend|dinner|date|visit|hug|connect|partner|girlfriend|wife|sister|brother)\b/i },
+  { p: "Life", re: /\b(call|text|message|reply|love|mom|dad|mum|family|friend|dinner|date|visit|hug|connect|partner|girlfriend|wife|sister|brother)\b/i },
   { p: "Leverage", re: /\b(income|pay|paid|invoice|cash|close|deal|client|revenue|contract|proposal|charge|stripe|salary|raise|negotiat|pitch|earn|investor|ask|arc)\b/i },
   { p: "Marketplace", re: /\b(marketplace|listing|list|launch|product|ship|sale|sales|store|onboard|customer|user|signup|sign-?up|waitlist|landing)\b/i },
   { p: "Loops", re: /\b(tool|system|meta|dashboard|rename|domain|vault|refactor|setup|automation|inbox|sweep|email)\b/i },
 ];
 
-// Named people first (highest confidence), then generic relationship words.
-// Reuses the same real names that have come up throughout this build rather
-// than inventing a separate roster system.
+// Generic relationship words only. Personal names stay in local user data.
 const PARTY_PATTERNS: Array<{ re: RegExp; name: string }> = [
-  { re: /\bmaanasa\b/i, name: "Maanasa" },
-  { re: /\badina\b/i, name: "Adina" },
   { re: /\b(mom|mum)\b/i, name: "Mom" },
   { re: /\bdad\b/i, name: "Dad" },
   { re: /\bfamily\b/i, name: "Family" },
