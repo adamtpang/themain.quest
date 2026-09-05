@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "tsc --noEmit",
     "test": "node --conditions=react-server --import tsx --test tests/*.test.ts",
+    "life:context": "node --conditions=react-server --import tsx scripts/export-life-context.ts",
     "verify:ui": "node scripts/verify-life-ui.cjs",
     "verify:life": "npm test && node scripts/verify-life-quest-loop.cjs && node scripts/verify-landing-ui.cjs"
   },

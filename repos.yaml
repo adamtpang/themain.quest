@@ -1,8 +1,22 @@
-# repos.yaml v0 — see github.com/adamtpang/repo-connect
+# repos.yaml v0 - see github.com/adamtpang/repos.chat
 repo: themain.quest
 is: A single-screen, mobile-first life dashboard that shows the one move that matters most right now, refusing to let motion masquerade as progress.
 url: https://themain.quest
 cluster: money-os
+
+provides:
+  - id: death-guide
+    what: Adam's mortality-based personal life cheatsheet with daily, weekly, decision, relationship, work, and practical death-readiness protocols
+    at: deathguide.md
+  - id: life-context-brief
+    what: builds the "# Personal context" brief (situation, problems, goals, priorities, constraints, patterns, guidance, open questions) from the questbook, death guide, character sheet, and live outbox, with money amounts redacted and quest details cut to their titles
+    at: lib/life-context.ts
+  - id: life-context-export
+    what: prints the brief and, with --send, mails it to summon.guide as a repos.chat notice (subject life-context) so the guides there read the real quest instead of a pasted summary
+    at: scripts/export-life-context.ts
+  - id: life-context-api
+    what: owner-only GET that returns the same brief for the private command center
+    at: app/api/life-context/route.ts
 
 kin:
   - repo: moneymeta.fun
@@ -15,7 +29,7 @@ kin:
     why: sprite already computes importance x urgency triage over every Gmail inbox and classifies REPLY/TASK/NOISE (triage-score.ts), a real source of candidate "one move" items (expiring API keys, verification deadlines) that themain.quest doesn't pull from yet.
   - repo: optimism.fun
     why: optimism.fun ranks which problems are worth a lifetime of work at civilizational scale, the macro choose-the-quest layer; this repo holds whatever quest Adam actually commits to as the one binding goal and runs it day to day, the micro execute-the-quest layer. Same quest-selection thesis, different scale. In the who/what/where life map this repo hubs, optimism.fun is one of the two WHAT engines (which problem deserves the work), alongside skill.supply (which paid seat to take on it).
-  - repo: ObsidianVault
+  - repo: obsidian.md
     why: the vault is Adam's life knowledge base and life game OS (updated 2026-08-20). Its six live surfaces (🗺️ QUESTBOOK with the 100-year map and quest chains, 🧙 CHARACTER, 🌟 S-TIER LIFE, 🐆 outbox as the daily board, 🐢 inbox, questline/ Russian-doll containers) ARE the game state this dashboard fronts; the outbox's top task is literally the "one move" this app exists to surface. The /process, /fillup, and /find-limiting-factor skills that maintain the vault read this repo's lib/route.ts for session routing. The 8020.best boards remain as a legacy ranked feed.
   - repo: 8020.best
     why: Same importance x urgency triage pattern as sprite.email and the ObsidianVault boards, applied to browser tabs instead of inbox or notes -- AI-buckets and tiers (S/A/B/C/D/F) open tabs weighted against the same FOCUS.md priorities themain.quest is built around, surfacing the top few as one-click "Next up" actions. Another candidate "one move" feed themain.quest doesn't pull from yet.
@@ -26,4 +40,14 @@ kin:
   - repo: portal.voyage
     why: the WHERE engine of the life map this repo hubs. This repo's CLAUDE.md names WHERE (places) as one of its three lenses alongside WHAT and WHO (Naval Ravikant's three big decisions that deserve deliberate time); portal.voyage is the real WHERE substance, a constraint-matcher (lib/score.ts) that ranks where to live given passport and field. Live case: the current main quest's SF-vs-Austin-vs-Singapore location question is exactly a portal.voyage query.
   - repo: summon.guide
-    why: the current binding quest is to learn from Popper and Deutsch and mine that into questbook material. summon.guide already has a fully grounded David Deutsch guide (figures.ts slug "deutsch", sourced from The Beginning of Infinity and The Fabric of Reality), a real chat-against mentor for the fallibilist epistemology (conjecture, criticism, the "problems are soluble" thesis) this quest is actually about, not just a reading list.
+    why: summon.guide is the council of past lives to this repo's present life, the way Aang's past Avatars sat around his actual problem. This repo exports the life-context brief (lib/life-context.ts, `npm run life:context -- --send`) as a repos.chat notice; summon.guide reads it from its mailbox (src/lib/lifeContext.ts), seats the guides whose own lives answer the current boss, fork, and one move (/council, src/app/api/council/route.ts), and attaches the brief to the chosen guide's chat. The Deutsch guide there (figures.ts slug "deutsch") remains the grounded mentor for the questbook's own fallibilist design.
+
+exchanges:
+  - id: life-context
+    with: summon.guide
+    trigger: manual
+    asks: nothing; this is a notice. themain.quest sends the current "# Personal context" brief whenever the questbook or outbox changes
+    returns: summon.guide seats a council of three guides against the brief and attaches it to the chosen guide chat for that browser session only; nothing is written back
+    permission: notice
+    approval: owner-reviews-brief-before-send
+    at: scripts/export-life-context.ts
